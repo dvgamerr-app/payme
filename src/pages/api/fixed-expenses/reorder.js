@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
-import { db, schema } from '../../../lib/db.js'
-import { requireAuth } from '../../../lib/middleware.js'
-import { handleApiRequest, jsonSuccess, jsonError } from '../../../lib/api-utils.js'
+import { db, schema } from '@/lib/db.js'
+import { requireAuth } from '@/lib/middleware.js'
+import { handleApiRequest, jsonSuccess, jsonError } from '@/lib/api-utils.js'
 
 const { fixedExpenses } = schema
 

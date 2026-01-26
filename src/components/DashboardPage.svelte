@@ -1,8 +1,8 @@
 <script>
   import { onMount } from 'svelte'
   import { fade, fly } from 'svelte/transition'
-  import { api } from '../lib/api.js'
-  import { settings } from '../stores/settings.js'
+  import { api } from '@/lib/api.js'
+  import { settings } from '@/stores/settings.js'
   import Layout from './Layout.svelte'
   import MonthNav from './MonthNav.svelte'
   import Summary from './Summary.svelte'

@@ -1,11 +1,11 @@
-import { registerUser, createSession } from '../../../lib/auth.js'
+import { registerUser, createSession } from '@/lib/auth.js'
 import {
   handleApiRequest,
   jsonSuccess,
   jsonError,
   validateRequired,
   setSessionCookie,
-} from '../../../lib/api-utils.js'
+} from '@/lib/api-utils.js'
 
 export const POST = async ({ request, cookies }) => {
   return handleApiRequest(async () => {

@@ -1,8 +1,8 @@
 import { and, asc, eq, sql } from 'drizzle-orm'
-import { db, schema } from '../../../../../lib/db.js'
-import { requireAuth } from '../../../../../lib/middleware.js'
-import { handleApiRequest, jsonSuccess, parseIntParam } from '../../../../../lib/api-utils.js'
-import { getMonthByIdForUser } from '../../../../../lib/db-helpers.js'
+import { db, schema } from '@/lib/db.js'
+import { requireAuth } from '@/lib/middleware.js'
+import { handleApiRequest, jsonSuccess, parseIntParam } from '@/lib/api-utils.js'
+import { getMonthByIdForUser } from '@/lib/db-helpers.js'
 
 const { budgetCategories, items, monthlyBudgets } = schema
 

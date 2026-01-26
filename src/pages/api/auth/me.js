@@ -1,5 +1,5 @@
-import { getUserFromSession } from '../../../lib/auth.js'
-import { handleApiRequest, jsonSuccess, jsonError } from '../../../lib/api-utils.js'
+import { getUserFromSession } from '@/lib/auth.js'
+import { handleApiRequest, jsonSuccess, jsonError } from '@/lib/api-utils.js'
 
 export const GET = async ({ cookies }) => {
   return handleApiRequest(async () => {

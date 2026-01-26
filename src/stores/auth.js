@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store'
-import logger from '../lib/client-logger.js'
-import { api } from '../lib/api.js'
+import logger from '@/lib/client-logger.js'
+import { api } from '@/lib/api.js'
 
 function createAuthStore() {
   const { subscribe, set, update } = writable({

@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
-import { db, schema } from '../../../lib/db.js'
-import { requireAuth } from '../../../lib/middleware.js'
-import { handleApiRequest, jsonSuccess } from '../../../lib/api-utils.js'
+import { db, schema } from '@/lib/db.js'
+import { requireAuth } from '@/lib/middleware.js'
+import { handleApiRequest, jsonSuccess } from '@/lib/api-utils.js'
 
 const { budgetCategories, fixedExpenses, incomeEntries, items, months } = schema
 

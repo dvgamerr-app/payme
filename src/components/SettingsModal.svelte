@@ -3,8 +3,8 @@
   import { Settings, DollarSign, List } from 'lucide-svelte'
   import Modal from './ui/Modal.svelte'
   import CategoryModal from './CategoryModal.svelte'
-  import { settings } from '../stores/settings.js'
-  import { api } from '../lib/api.js'
+  import { settings } from '@/stores/settings.js'
+  import { api } from '@/lib/api.js'
 
   export let isOpen = false
   export let onClose = () => {}

@@ -1,13 +1,8 @@
 import { and, eq } from 'drizzle-orm'
-import { db, schema } from '../../../../../lib/db.js'
-import { requireAuth } from '../../../../../lib/middleware.js'
-import {
-  handleApiRequest,
-  jsonSuccess,
-  jsonError,
-  parseIntParam,
-} from '../../../../../lib/api-utils.js'
-import { getCategoryByIdForUser } from '../../../../../lib/db-helpers.js'
+import { db, schema } from '@/lib/db.js'
+import { requireAuth } from '@/lib/middleware.js'
+import { handleApiRequest, jsonSuccess, parseIntParam } from '@/lib/api-utils.js'
+import { getCategoryByIdForUser } from '@/lib/db-helpers.js'
 
 const { items, months } = schema
 
@@ -45,7 +40,7 @@ export const PUT = async ({ params, request, cookies }) => {
     if (spent_on !== undefined) updates.spentOn = spent_on
 
     if (Object.keys(updates).length === 0) {
-      return jsonError('No fields to update', 400)
+      return ('No fields to update', 400)
     }
 
     await db.update(items).set(updates).where(eq(items.id, itemId))

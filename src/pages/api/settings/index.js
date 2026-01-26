@@ -1,11 +1,6 @@
-import { db, schema, nowSql } from '../../../lib/db.js'
+import { db, schema, nowSql } from '@/lib/db.js'
 import { eq } from 'drizzle-orm'
-import {
-  handleApiRequest,
-  jsonSuccess,
-  jsonError,
-  validateRequired,
-} from '../../../lib/api-utils.js'
+import { handleApiRequest, jsonSuccess, jsonError, validateRequired } from '@/lib/api-utils.js'
 
 export const GET = async ({ locals }) => {
   return handleApiRequest(async () => {

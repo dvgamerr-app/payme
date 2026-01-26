@@ -1,8 +1,8 @@
 <script>
   import { Moon, Sun, LogOut, ChartColumn, Settings } from 'lucide-svelte'
   import { onMount } from 'svelte'
-  import { theme } from '../stores/theme.js'
-  import { auth } from '../stores/auth.js'
+  import { theme } from '@/stores/theme.js'
+  import { auth } from '@/stores/auth.js'
   import SettingsModal from './SettingsModal.svelte'
 
   let isSettingsOpen = false

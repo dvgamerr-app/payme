@@ -1,5 +1,5 @@
-import { deleteSession } from '../../../lib/auth.js'
-import { handleApiRequest, jsonSuccess } from '../../../lib/api-utils.js'
+import { deleteSession } from '@/lib/auth.js'
+import { handleApiRequest, jsonSuccess } from '@/lib/api-utils.js'
 
 export const POST = async ({ cookies }) => {
   return handleApiRequest(async () => {

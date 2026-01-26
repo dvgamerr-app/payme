@@ -1,6 +1,6 @@
 <script>
   import { GripVertical } from 'lucide-svelte'
-  import { settings } from '../stores/settings'
+  import { settings } from '@/stores/settings'
   import Input from './ui/Input.svelte'
   import Toggle from './ui/Toggle.svelte'
   import Select from './ui/Select.svelte'

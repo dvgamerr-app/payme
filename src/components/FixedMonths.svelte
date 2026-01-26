@@ -1,8 +1,8 @@
 <script>
   import { Plus, GripVertical } from 'lucide-svelte'
-  import { api } from '../lib/api.js'
-  import { settings } from '../stores/settings.js'
-  import { formatCurrency } from '../lib/format-utils.js'
+  import { api } from '@/lib/api.js'
+  import { settings } from '@/stores/settings.js'
+  import { formatCurrency } from '@/lib/format-utils.js'
   import { dndzone } from 'svelte-dnd-action'
   import { flip } from 'svelte/animate'
   import Card from './ui/Card.svelte'

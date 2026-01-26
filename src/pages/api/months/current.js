@@ -1,8 +1,8 @@
 import { and, eq } from 'drizzle-orm'
-import { db, schema } from '../../../lib/db.js'
-import { requireAuth } from '../../../lib/middleware.js'
-import { handleApiRequest, jsonSuccess } from '../../../lib/api-utils.js'
-import { copyFixedExpensesToMonth } from '../../../lib/db-helpers.js'
+import { db, schema } from '@/lib/db.js'
+import { requireAuth } from '@/lib/middleware.js'
+import { handleApiRequest, jsonSuccess } from '@/lib/api-utils.js'
+import { copyFixedExpensesToMonth } from '@/lib/db-helpers.js'
 
 const { budgetCategories, monthlyBudgets, months } = schema
 

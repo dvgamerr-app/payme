@@ -1,9 +1,9 @@
 <script>
   import { onMount } from 'svelte'
   import { TrendingUp, Pencil, Check, X } from 'lucide-svelte'
-  import { api } from '../lib/api.js'
-  import { settings } from '../stores/settings.js'
-  import { formatCurrency } from '../lib/format-utils.js'
+  import { api } from '@/lib/api.js'
+  import { settings } from '@/stores/settings.js'
+  import { formatCurrency } from '@/lib/format-utils.js'
   import Card from './ui/Card.svelte'
   import Input from './ui/Input.svelte'
 

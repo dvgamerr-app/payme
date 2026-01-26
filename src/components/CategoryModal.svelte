@@ -1,9 +1,9 @@
 <script>
   import { Plus, Trash2, Edit2, Check, X } from 'lucide-svelte'
   import Input from './ui/Input.svelte'
-  import { api } from '../lib/api.js'
-  import { settings } from '../stores/settings.js'
-  import { formatCurrency } from '../lib/format-utils.js'
+  import { api } from '@/lib/api.js'
+  import { settings } from '@/stores/settings.js'
+  import { formatCurrency } from '@/lib/format-utils.js'
 
   export let categories = []
   export let onUpdate = () => {}

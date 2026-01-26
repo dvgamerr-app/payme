@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import { BarChart3 } from 'lucide-svelte'
-  import { api } from '../lib/api.js'
+  import { api } from '@/lib/api.js'
   import Modal from './ui/Modal.svelte'
   import Button from './ui/Button.svelte'
 

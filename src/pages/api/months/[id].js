@@ -1,6 +1,6 @@
-import { requireAuth } from '../../../lib/middleware.js'
-import { handleApiRequest, jsonSuccess, jsonError, parseIntParam } from '../../../lib/api-utils.js'
-import { getMonthSummary } from '../../../lib/db-helpers.js'
+import { requireAuth } from '@/lib/middleware.js'
+import { handleApiRequest, jsonSuccess, jsonError, parseIntParam } from '@/lib/api-utils.js'
+import { getMonthSummary } from '@/lib/db-helpers.js'
 
 export const GET = async ({ params, cookies }) => {
   return handleApiRequest(async () => {

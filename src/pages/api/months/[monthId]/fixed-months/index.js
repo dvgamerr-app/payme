@@ -1,13 +1,8 @@
 import { and, asc, desc, eq } from 'drizzle-orm'
-import { db, schema } from '../../../../../lib/db.js'
-import { requireAuth } from '../../../../../lib/middleware.js'
-import {
-  handleApiRequest,
-  jsonSuccess,
-  validateRequired,
-  parseIntParam,
-} from '../../../../../lib/api-utils.js'
-import { getMonthByIdForUser, getNextDisplayOrder } from '../../../../../lib/db-helpers.js'
+import { db, schema } from '@/lib/db.js'
+import { requireAuth } from '@/lib/middleware.js'
+import { handleApiRequest, jsonSuccess, validateRequired, parseIntParam } from '@/lib/api-utils.js'
+import { getMonthByIdForUser, getNextDisplayOrder } from '@/lib/db-helpers.js'
 
 const { fixedMonths } = schema
 

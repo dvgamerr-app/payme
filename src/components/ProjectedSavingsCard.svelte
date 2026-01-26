@@ -1,7 +1,7 @@
 <script>
   import { TrendingUp, HelpCircle } from 'lucide-svelte'
-  import { settings } from '../stores/settings.js'
-  import { formatCurrency } from '../lib/format-utils.js'
+  import { settings } from '@/stores/settings.js'
+  import { formatCurrency } from '@/lib/format-utils.js'
   import Card from './ui/Card.svelte'
 
   export let savings = 0

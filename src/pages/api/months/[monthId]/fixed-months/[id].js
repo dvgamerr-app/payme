@@ -1,13 +1,8 @@
 import { eq, sql } from 'drizzle-orm'
-import { db, schema } from '../../../../../lib/db.js'
-import { requireAuth } from '../../../../../lib/middleware.js'
-import {
-  handleApiRequest,
-  jsonSuccess,
-  jsonError,
-  parseIntParam,
-} from '../../../../../lib/api-utils.js'
-import { verifyFixedMonthOwnership } from '../../../../../lib/db-helpers.js'
+import { db, schema } from '@/lib/db.js'
+import { requireAuth } from '@/lib/middleware.js'
+import { handleApiRequest, jsonSuccess, jsonError, parseIntParam } from '@/lib/api-utils.js'
+import { verifyFixedMonthOwnership } from '@/lib/db-helpers.js'
 
 const { fixedMonths } = schema
 

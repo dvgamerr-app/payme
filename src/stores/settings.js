@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store'
-import logger from '../lib/client-logger.js'
+import logger from '@/lib/client-logger.js'
 
 const defaultSettings = {
   baseCurrency: 'THB',

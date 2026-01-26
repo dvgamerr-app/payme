@@ -1,4 +1,4 @@
-import { handleApiRequest, jsonSuccess, jsonError } from '../../../lib/api-utils.js'
+import { handleApiRequest, jsonSuccess, jsonError } from '@/lib/api-utils.js'
 
 export const GET = async ({ locals, url }) => {
   return handleApiRequest(async () => {

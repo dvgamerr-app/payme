@@ -1,6 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro'
-import { getUserFromSession } from '../lib/auth.js'
+import Layout from '@/layouts/Layout.astro'
+import { getUserFromSession } from '@/lib/auth.js'
 
 // Check if user is already authenticated
 const sessionId = Astro.cookies.get('session_id')?.value
