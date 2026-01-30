@@ -20,6 +20,7 @@ export const GET = async ({ locals }) => {
           userId,
           baseCurrency: 'THB',
           currencySymbol: '฿',
+          payday: 'end',
         })
         .returning()
       settings = newSettings
@@ -28,6 +29,7 @@ export const GET = async ({ locals }) => {
     return jsonSuccess({
       baseCurrency: settings.baseCurrency,
       currencySymbol: settings.currencySymbol,
+      payday: settings.payday,
     })
   })
 }
@@ -40,9 +42,9 @@ export const PUT = async ({ request, locals }) => {
     }
 
     const body = await request.json()
-    const { baseCurrency, currencySymbol } = body
+    const { baseCurrency, currencySymbol, payday } = body
 
-    validateRequired(body, ['baseCurrency', 'currencySymbol'])
+    validateRequired(body, ['baseCurrency', 'currencySymbol', 'payday'])
 
     const existing = await db.query.userSettings.findFirst({
       where: eq(schema.userSettings.userId, userId),
@@ -55,6 +57,7 @@ export const PUT = async ({ request, locals }) => {
         .set({
           baseCurrency,
           currencySymbol,
+          payday,
           updatedAt: nowSql,
         })
         .where(eq(schema.userSettings.userId, userId))
@@ -66,6 +69,7 @@ export const PUT = async ({ request, locals }) => {
           userId,
           baseCurrency,
           currencySymbol,
+          payday,
         })
         .returning()
     }
@@ -73,6 +77,7 @@ export const PUT = async ({ request, locals }) => {
     return jsonSuccess({
       baseCurrency: settings.baseCurrency,
       currencySymbol: settings.currencySymbol,
+      payday: settings.payday,
     })
   })
 }

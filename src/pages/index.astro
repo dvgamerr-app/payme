@@ -20,12 +20,14 @@ if (!user) {
 <script>
   import { theme } from '@/stores/theme.js'
   import { auth } from '@/stores/auth.js'
-  // import { settings } from '@/stores/settings.js'
+  import { settings } from '@/stores/settings.js'
 
   // Initialize theme
   theme.init()
 
   // Initialize auth state
   auth.checkAuth()
-  // await settings.load()
+
+  // Load settings from API
+  settings.load()
 </script>

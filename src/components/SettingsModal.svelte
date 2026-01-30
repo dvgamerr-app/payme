@@ -1,5 +1,4 @@
 <script>
-  import { onMount } from 'svelte'
   import { Settings, DollarSign, List } from 'lucide-svelte'
   import Modal from './ui/Modal.svelte'
   import CategoryModal from './CategoryModal.svelte'
@@ -18,9 +17,10 @@
     activeTab = tab
   }
 
-  // Reset to initialTab when modal opens
+  // Reset to initialTab and load settings when modal opens
   $: if (isOpen) {
     activeTab = initialTab
+    settings.load()
   }
 
   const currencies = [
@@ -36,23 +36,31 @@
     { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit' },
   ]
 
-  let selectedCurrency = 'THB'
+  const paydayOptions = [
+    { value: 'end', label: 'สิ้นเดือน', description: 'End of Month' },
+    { value: '25', label: 'วันที่ 25', description: '25th of month' },
+    { value: '28', label: 'วันที่ 28', description: '28th of month' },
+  ]
 
-  onMount(() => {
-    const unsubscribe = settings.subscribe((state) => {
-      if (state.loaded) {
-        selectedCurrency = state.baseCurrency
-      }
-    })
-
-    return unsubscribe
-  })
+  // Reactive values from settings store
+  $: selectedCurrency = $settings.baseCurrency || 'THB'
+  $: selectedPayday = $settings.payday || 'end'
 
   const selectCurrency = async (currency) => {
     selectedCurrency = currency.code
     await settings.save({
       baseCurrency: currency.code,
       currencySymbol: currency.symbol,
+      payday: selectedPayday,
+    })
+  }
+
+  const selectPayday = async (option) => {
+    selectedPayday = option.value
+    await settings.save({
+      baseCurrency: selectedCurrency,
+      currencySymbol: currencies.find((c) => c.code === selectedCurrency)?.symbol || '฿',
+      payday: option.value,
     })
   }
 
@@ -74,10 +82,10 @@
   ]
 </script>
 
-<Modal {isOpen} {onClose} title="Settings" size="xl">
-  <div class="flex gap-4">
-    <!-- Sidebar -->
-    <div class="border-border flex w-40 flex-col gap-1 border-r pr-3">
+<Modal {isOpen} {onClose} title="Settings" size="xl" noScroll>
+  <div class="flex h-full gap-4">
+    <!-- Sidebar (fixed, no scroll) -->
+    <div class="border-border flex w-40 shrink-0 flex-col gap-1 border-r pr-3">
       {#each tabs as tab}
         <button
           class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors {activeTab ===
@@ -92,8 +100,8 @@
       {/each}
     </div>
 
-    <!-- Content -->
-    <div class="flex-1">
+    <!-- Content (scrollable) -->
+    <div class="flex-1 overflow-y-auto">
       {#if activeTab === 'general'}
         <div class="flex flex-col gap-6">
           <p class="text-muted-foreground -mt-2 text-[0.9375rem]">
@@ -120,6 +128,24 @@
                     <span class="text-sm font-medium">{currency.code}</span>
                     <span class="text-muted-foreground text-xs">{currency.name}</span>
                   </div>
+                </button>
+              {/each}
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <h3 class="m-0 text-[0.9375rem] font-semibold">วันเงินเดือนออก (Payday)</h3>
+            <div class="grid grid-cols-3 gap-2">
+              {#each paydayOptions as option}
+                <button
+                  class="flex flex-col items-center gap-1 rounded-lg border px-3 py-3 transition-colors {selectedPayday ===
+                  option.value
+                    ? 'border-[#d4a574] bg-linear-to-br from-[#d4a574]/10 to-[#d4a574]/5'
+                    : 'border-border hover:border-muted-foreground hover:bg-secondary/50'}"
+                  on:click={() => selectPayday(option)}
+                >
+                  <span class="text-sm font-medium">{option.label}</span>
+                  <span class="text-muted-foreground text-xs">{option.description}</span>
                 </button>
               {/each}
             </div>

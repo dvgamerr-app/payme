@@ -4,6 +4,7 @@ import logger from '@/lib/client-logger.js'
 const defaultSettings = {
   baseCurrency: 'THB',
   currencySymbol: '฿',
+  payday: 'end', // 'end', '25', '28'
   loaded: false,
 }
 
@@ -23,6 +24,7 @@ function createSettingsStore() {
           set({
             baseCurrency: data.baseCurrency || 'THB',
             currencySymbol: data.currencySymbol || '฿',
+            payday: data.payday || 'end',
             loaded: true,
           })
         } else {
@@ -34,13 +36,13 @@ function createSettingsStore() {
       }
     },
 
-    async save({ baseCurrency, currencySymbol }) {
+    async save({ baseCurrency, currencySymbol, payday }) {
       try {
         const response = await fetch('/api/settings', {
           method: 'PUT',
           credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ baseCurrency, currencySymbol }),
+          body: JSON.stringify({ baseCurrency, currencySymbol, payday }),
         })
 
         if (response.ok) {
@@ -49,6 +51,7 @@ function createSettingsStore() {
             ...state,
             baseCurrency: data.baseCurrency,
             currencySymbol: data.currencySymbol,
+            payday: data.payday,
           }))
           return true
         } else {

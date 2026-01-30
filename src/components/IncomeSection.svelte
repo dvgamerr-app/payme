@@ -14,7 +14,6 @@
   export let entries = []
   export let totalIncome = 0
   export let isReadOnly = false
-  export let isCurrentMonth = false
   export let onUpdate = () => {}
 
   const flipDurationMs = 0
@@ -238,7 +237,7 @@
     {/if}
 
     {#if entries.length === 0 && !isAdding}
-      {#if isCurrentMonth && !isReadOnly}
+      {#if !isReadOnly}
         <div class="py-6 text-center">
           <p class="text-muted-foreground mb-3 text-sm">No income entries</p>
           <button

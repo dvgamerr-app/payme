@@ -11,6 +11,7 @@
   export let title = ''
   export let onClose = () => {}
   export let size = 'md' // 'sm', 'md', 'lg', 'xl'
+  export let noScroll = false // When true, content manages its own scrolling
 
   const sizeClasses = {
     sm: 'max-w-md',
@@ -84,7 +85,7 @@
             <X size={20} />
           </button>
         </div>
-        <div class="flex-1 overflow-y-auto px-6 pb-6">
+        <div class="flex-1 px-6 pb-6 {noScroll ? 'overflow-hidden' : 'overflow-y-auto'}">
           <slot />
         </div>
       </div>

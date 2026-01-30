@@ -65,6 +65,7 @@ export const userSettings = sqliteTable('user_settings', {
     .unique(),
   baseCurrency: text('base_currency').notNull().default('THB'),
   currencySymbol: text('currency_symbol').notNull().default('฿'),
+  payday: text('payday').notNull().default('end'), // 'end', '25', '28'
   updatedAt: text('updated_at')
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),

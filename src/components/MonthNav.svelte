@@ -1,5 +1,7 @@
 <script>
   import { ChevronLeft, ChevronRight } from 'lucide-svelte'
+  import { settings } from '@/stores/settings.js'
+  import { onMount } from 'svelte'
 
   export let year = undefined
   export let month = undefined
@@ -18,6 +20,14 @@
     'Nov',
     'Dec',
   ]
+
+  // Load settings on mount
+  onMount(() => {
+    settings.load()
+  })
+
+  // Reactive payday from settings store
+  $: payday = $settings.payday || 'end'
 
   // Determine current year/month from props or current date
   $: currentYear = year || new Date().getFullYear().toString()
@@ -55,11 +65,54 @@
     link.href = `/${nextYear}/${MONTH_NAMES[nextMonth - 1]}`
     link.dataset.astroTransition = 'forward'
     link.click()
-
-    // setTimeout(() => {
-    //   if (isCurrent) history.replaceState(null, null, '/')
-    // }, 2000)
   }
+
+  // Check if user can access next month based on payday setting
+  function canAccessNextMonth(paydaySetting) {
+    const now = new Date()
+    const today = now.getDate()
+    const nowYear = now.getFullYear()
+    const nowMonth = now.getMonth() + 1 // 1-indexed
+
+    // Calculate target month/year for next button
+    let targetMonth = currentMonth + 1
+    let targetYear = parseInt(currentYear)
+    if (targetMonth > 12) {
+      targetMonth = 1
+      targetYear++
+    }
+
+    // If target is in the past or current month, allow
+    if (targetYear < nowYear) return true
+    if (targetYear === nowYear && targetMonth <= nowMonth) return true
+
+    // If target is next month, check if payday has passed
+    if (targetYear === nowYear && targetMonth === nowMonth + 1) {
+      let paydayDate
+      if (paydaySetting === 'end') {
+        // Last day of current month
+        paydayDate = new Date(nowYear, nowMonth, 0).getDate()
+      } else {
+        paydayDate = parseInt(paydaySetting)
+      }
+      return today >= paydayDate
+    }
+
+    // For January next year when we're in December
+    if (targetYear === nowYear + 1 && targetMonth === 1 && nowMonth === 12) {
+      let paydayDate
+      if (paydaySetting === 'end') {
+        paydayDate = new Date(nowYear, 12, 0).getDate() // Last day of December
+      } else {
+        paydayDate = parseInt(paydaySetting)
+      }
+      return today >= paydayDate
+    }
+
+    return false
+  }
+
+  $: nextDisabled = !canAccessNextMonth(payday)
 </script>
 
 <div class="mb-6 flex items-center justify-between">
@@ -76,8 +129,7 @@
     </div>
     <button
       on:click={goNext}
-      disabled={currentYear === new Date().getFullYear().toString() &&
-        currentMonth === new Date().getMonth() + 1}
+      disabled={nextDisabled}
       class="hover:bg-accent flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors disabled:cursor-default disabled:opacity-20"
     >
       <ChevronRight size={18} />
