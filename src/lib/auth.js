@@ -3,7 +3,7 @@ import { and, eq, gt, lte } from 'drizzle-orm'
 import logger from './logger.js'
 import { db, nowSql, schema } from './db.js'
 
-const { sessions, users } = schema
+const { sessions, users, budgetCategories } = schema
 
 const SALT_ROUNDS = 10
 const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000 // 30 days
@@ -73,7 +73,18 @@ export const registerUser = async (username, password) => {
       .insert(users)
       .values({ username, passwordHash })
       .returning({ id: users.id, username: users.username })
-    return rows[0]
+    const user = rows[0]
+
+    // สร้าง default category "อื่นๆ" ให้ผู้ใช้ใหม่
+    if (user) {
+      await db.insert(budgetCategories).values({
+        userId: user.id,
+        label: 'อื่นๆ',
+        defaultAmount: 0,
+      })
+    }
+
+    return user
   } catch (error) {
     if (
       error?.code === 'SQLITE_CONSTRAINT_UNIQUE' ||

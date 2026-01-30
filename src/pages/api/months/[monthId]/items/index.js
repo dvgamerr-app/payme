@@ -39,16 +39,33 @@ export const POST = async ({ params, request, cookies }) => {
     const body = await request.json()
     const { category_id, description, amount, spent_on } = body
 
-    validateRequired(body, ['category_id', 'description', 'amount', 'spent_on'])
+    validateRequired(body, ['description', 'amount', 'spent_on'])
 
     await getMonthByIdForUser(monthId, user.id)
-    await getCategoryByIdForUser(category_id, user.id)
+
+    // ถ้าไม่ได้เลือก category ให้ใช้ "อื่นๆ" category เป็น default
+    let finalCategoryId = category_id
+    if (!category_id) {
+      const defaultCategory = await db
+        .select({ id: budgetCategories.id })
+        .from(budgetCategories)
+        .where(eq(budgetCategories.userId, user.id))
+        .limit(1)
+
+      if (defaultCategory.length > 0) {
+        finalCategoryId = defaultCategory[0].id
+      } else {
+        throw new Error('No category available. Please create a category first.')
+      }
+    } else {
+      await getCategoryByIdForUser(category_id, user.id)
+    }
 
     const rows = await db
       .insert(items)
       .values({
         monthId,
-        categoryId: category_id,
+        categoryId: finalCategoryId,
         description,
         amount,
         spentOn: spent_on,
@@ -58,7 +75,7 @@ export const POST = async ({ params, request, cookies }) => {
     const item = {
       id: rows[0]?.id,
       month_id: monthId,
-      category_id,
+      category_id: finalCategoryId,
       description,
       amount,
       spent_on,

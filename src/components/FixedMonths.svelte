@@ -119,7 +119,7 @@
     </button>
   </div>
 
-  <div class="min-h-50 space-y-0">
+  <div class="max-h-60 min-h-60 space-y-0 overflow-y-auto">
     <div
       use:dndzone={{
         items,
