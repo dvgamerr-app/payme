@@ -101,7 +101,7 @@ export const getMonthSummary = async (monthId, userId) => {
   const total_fixed = fixed_expenses.reduce((sum, e) => sum + e.amount, 0)
   const total_budgeted = budgets.reduce((sum, b) => sum + b.allocated_amount, 0)
   const total_spent = itemsRows.reduce((sum, i) => sum + i.amount, 0)
-  const remaining = total_income + total_fixed - total_spent
+  const remaining = total_income - total_spent
 
   return {
     month,

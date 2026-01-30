@@ -112,7 +112,6 @@
 
       const totalSpent = items.reduce((sum, i) => sum + i.amount, 0)
 
-      month.remaining = month.remaining + totalFixed
       summary = {
         ...month,
         items,
