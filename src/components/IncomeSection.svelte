@@ -92,7 +92,7 @@
   async function copyFromPrevious() {
     if (!monthId) return
     try {
-      await api.income.copyFromPrevious(monthId)
+      await api.income.copy(monthId)
       await onUpdate()
     } catch (error) {
       console.error('Failed to copy income:', error)
