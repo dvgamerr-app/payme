@@ -1,9 +1,9 @@
-import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, inArray, or, sql } from 'drizzle-orm'
 import { db, schema } from '@/lib/db.js'
 import { requireAuth } from '@/lib/middleware.js'
 import { handleApiRequest, jsonSuccess } from '@/lib/api-utils.js'
 
-const { budgetCategories, fixedExpenses, incomeEntries, items, months } = schema
+const { budgetCategories, fixedMonths, incomeEntries, items, months } = schema
 
 export const GET = async ({ cookies }) => {
   return handleApiRequest(async () => {
@@ -111,19 +111,23 @@ export const GET = async ({ cookies }) => {
       }
     }
 
-    const fixedExpensesRows = await db
+    // Query fixedMonths ที่เดือน >= เดือนปัจจุบัน
+    const fixedMonthsRows = await db
       .select({
-        amount: fixedExpenses.amount,
-        frequency: fixedExpenses.frequency,
-        exchange_rate: fixedExpenses.exchangeRate,
+        amount: fixedMonths.amount,
       })
-      .from(fixedExpenses)
-      .where(eq(fixedExpenses.userId, user.id))
-    const totalFixed = fixedExpensesRows.reduce((sum, e) => {
-      const monthlyAmount = e.frequency === 'yearly' ? e.amount / 12 : e.amount
-      const exchangeRate = e.exchange_rate || 1
-      return sum + monthlyAmount * exchangeRate
-    }, 0)
+      .from(fixedMonths)
+      .innerJoin(months, eq(months.id, fixedMonths.monthId))
+      .where(
+        and(
+          eq(months.userId, user.id),
+          or(
+            gte(months.year, currentYear + 1),
+            and(eq(months.year, currentYear), gte(months.month, currentMonth))
+          )
+        )
+      )
+    const totalFixed = fixedMonthsRows.reduce((sum, e) => sum + e.amount, 0)
 
     const monthly_trends = monthRows.map((row) => {
       const total_income = incomeByMonth.get(row.id) ?? 0

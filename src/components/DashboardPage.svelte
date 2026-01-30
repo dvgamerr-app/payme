@@ -41,7 +41,7 @@
   let summary = null
   let categories = []
   let selectedMonthId = null
-  let isCurrentMonth = false
+  let isCurrentOrFutureMonth = false
 
   onMount(async () => {
     await loadData()
@@ -65,7 +65,7 @@
         return
       }
       selectedMonthId = current.id
-      isCurrentMonth = true
+      isCurrentOrFutureMonth = true
       await loadMonthSummary(current.id)
 
       return
@@ -73,7 +73,11 @@
 
     selectedMonthId = current.id
     const now = new Date()
-    isCurrentMonth = current.year === now.getFullYear() && current.month === now.getMonth() + 1
+    const currentYear = now.getFullYear()
+    const currentMonth = now.getMonth() + 1
+    // เดือนปัจจุบันหรืออนาคต: year > currentYear หรือ (year = currentYear และ month >= currentMonth)
+    isCurrentOrFutureMonth =
+      current.year > currentYear || (current.year === currentYear && current.month >= currentMonth)
     await loadMonthSummary(current.id)
   }
 
@@ -91,10 +95,10 @@
       const month = await api.months.get(monthId)
       const items = await api.items.list(monthId)
 
-      // ใช้ fixed_expenses สำหรับ current month, fixed_months สำหรับเดือนย้อนหลัง
+      // ใช้ fixed_expenses สำหรับ current/future month, fixed_months สำหรับเดือนย้อนหลัง
       let fixedExpenses
       let totalFixed
-      if (isCurrentMonth) {
+      if (isCurrentOrFutureMonth) {
         fixedExpenses = await api.fixedExpenses.list()
         totalFixed = fixedExpenses.reduce((sum, e) => {
           const monthlyAmount = e.frequency === 'yearly' ? e.amount / 12 : e.amount
@@ -168,7 +172,7 @@
             isReadOnly={summary.month.is_closed}
             onUpdate={refresh}
           />
-          {#if isCurrentMonth}
+          {#if isCurrentOrFutureMonth}
             <FixedExpenses
               expenses={summary.fixed_expenses}
               totalFixed={summary.total_fixed}
