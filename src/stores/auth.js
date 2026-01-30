@@ -49,6 +49,8 @@ function createAuthStore() {
       try {
         await api.auth.logout()
         set({ user: null, loading: false, error: null })
+        // Redirect to login page after logout
+        window.location.href = '/login'
       } catch (error) {
         logger.error('Logout failed', error)
       }
