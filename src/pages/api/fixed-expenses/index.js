@@ -1,4 +1,4 @@
-import { asc, desc, eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { db, schema } from '@/lib/db.js'
 import { requireAuth } from '@/lib/middleware.js'
 import { handleApiRequest, jsonSuccess, validateRequired } from '@/lib/api-utils.js'
@@ -6,9 +6,9 @@ import { getNextDisplayOrder } from '@/lib/db-helpers.js'
 
 const { fixedExpenses } = schema
 
-export const GET = async ({ cookies }) => {
+export const GET = async ({ request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const expenses = await db
       .select({
         id: fixedExpenses.id,
@@ -28,9 +28,9 @@ export const GET = async ({ cookies }) => {
   })
 }
 
-export const POST = async ({ request, cookies }) => {
+export const POST = async ({ request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const body = await request.json()
     const { label, amount, frequency = 'monthly', currency = 'THB', exchange_rate = 1 } = body
 

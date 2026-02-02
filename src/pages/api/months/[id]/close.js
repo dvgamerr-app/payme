@@ -5,9 +5,9 @@ import { handleApiRequest, jsonSuccess, jsonError, parseIntParam } from '@/lib/a
 
 const { months } = schema
 
-export const POST = async ({ params, cookies }) => {
+export const POST = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const id = parseIntParam(params.id, 'month ID')
 
     const monthRows = await db

@@ -1,15 +1,5 @@
 ---
 import Layout from '@/layouts/Layout.astro'
-import { getUserFromSession } from '@/lib/auth.js'
-
-// Check if user is already authenticated
-const sessionId = Astro.cookies.get('session_id')?.value
-const user = await getUserFromSession(sessionId)
-
-// Redirect to dashboard if authenticated
-if (user) {
-  return Astro.redirect('/')
-}
 ---
 
 <Layout title="Login - PayMe">
@@ -93,6 +83,13 @@ if (user) {
   </div>
 
   <script>
+    import { isAuthenticated, startTokenRefresh } from '@/lib/api.js'
+
+    // Check if already logged in
+    if (isAuthenticated()) {
+      window.location.href = '/'
+    }
+
     const form = document.getElementById('loginForm') as HTMLFormElement | null
     const errorDiv = document.getElementById('error') as HTMLDivElement | null
 
@@ -105,17 +102,21 @@ if (user) {
         const password = formData.get('password') as string
 
         errorDiv.classList.add('hidden')
-        // Disable button styling logic here if needed, but keeping it simple
 
         try {
           const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
-            credentials: 'include',
           })
 
           if (response.ok) {
+            const data = await response.json()
+            // Store tokens
+            localStorage.setItem('payme_access_token', data.accessToken)
+            localStorage.setItem('payme_refresh_token', data.refreshToken)
+            localStorage.setItem('payme_token_expiry', String(Date.now() + data.expiresIn))
+            startTokenRefresh()
             window.location.href = '/'
           } else {
             const data = await response.json()

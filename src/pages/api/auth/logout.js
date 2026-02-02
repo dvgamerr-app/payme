@@ -1,16 +1,9 @@
-import { deleteSession } from '@/lib/auth.js'
-import { handleApiRequest, jsonSuccess } from '@/lib/api-utils.js'
+import { handleApiRequest } from '@/lib/api-utils.js'
 
-export const POST = async ({ cookies }) => {
+export const POST = async () => {
   return handleApiRequest(async () => {
-    const sessionId = cookies.get('session_id')?.value
-
-    if (sessionId) {
-      await deleteSession(sessionId)
-    }
-
-    cookies.delete('session_id', { path: '/' })
-
+    // Client-side handles token removal from localStorage
+    // Server just acknowledges the logout
     return new Response(null, { status: 204 })
   })
 }

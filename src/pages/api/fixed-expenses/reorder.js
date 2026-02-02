@@ -5,9 +5,9 @@ import { handleApiRequest, jsonSuccess, jsonError } from '@/lib/api-utils.js'
 
 const { fixedExpenses } = schema
 
-export const PUT = async ({ request, cookies }) => {
+export const PUT = async ({ request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const body = await request.json()
     const { order } = body
 

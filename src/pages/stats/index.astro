@@ -1,39 +1,29 @@
 ---
 import Layout from '@/layouts/Layout.astro'
-import { getUserFromSession } from '@/lib/auth.js'
-import { getStatsData } from '@/lib/data/stats.js'
 import StatsDashboard from '@/components/stats/StatsDashboard.svelte'
-
-// Auth Check
-const sessionId = Astro.cookies.get('session_id')?.value
-const user = await getUserFromSession(sessionId)
-
-if (!user) {
-  return Astro.redirect('/login')
-}
-
-// Fetch Data
-const statsData = await getStatsData(user)
-
-// Reverse trends to show oldest -> newest for the chart
-statsData.monthly_trends = [...statsData.monthly_trends].reverse()
 ---
 
 <Layout title="Stats - PayMe">
-  <StatsDashboard client:load data={statsData} />
+  <StatsDashboard client:load />
 </Layout>
 
 <script>
   import { theme } from '@/stores/theme.js'
   import { auth } from '@/stores/auth.js'
   import { settings } from '@/stores/settings.js'
+  import { isAuthenticated } from '@/lib/api.js'
 
-  // Initialize theme
-  theme.init()
+  // Check if authenticated, redirect to login if not
+  if (!isAuthenticated()) {
+    window.location.href = '/login'
+  } else {
+    // Initialize theme
+    theme.init()
 
-  // Initialize auth state
-  auth.checkAuth()
+    // Initialize auth state
+    auth.checkAuth()
 
-  // Load settings from API
-  settings.load()
+    // Load settings from API
+    settings.load()
+  }
 </script>

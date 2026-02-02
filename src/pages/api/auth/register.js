@@ -1,13 +1,7 @@
-import { registerUser, createSession } from '@/lib/auth.js'
-import {
-  handleApiRequest,
-  jsonSuccess,
-  jsonError,
-  validateRequired,
-  setSessionCookie,
-} from '@/lib/api-utils.js'
+import { registerUser, generateAccessToken, generateRefreshToken } from '@/lib/auth.js'
+import { handleApiRequest, jsonSuccess, jsonError, validateRequired } from '@/lib/api-utils.js'
 
-export const POST = async ({ request, cookies }) => {
+export const POST = async ({ request }) => {
   return handleApiRequest(async () => {
     const body = await request.json()
     const { username, password } = body
@@ -19,10 +13,17 @@ export const POST = async ({ request, cookies }) => {
     }
 
     const user = await registerUser(username, password)
-    const { sessionId, expiresAt } = await createSession(user.id)
+    const accessToken = generateAccessToken(user.id)
+    const refreshToken = generateRefreshToken(user.id)
 
-    setSessionCookie(cookies, sessionId, expiresAt)
-
-    return jsonSuccess({ id: user.id, username: user.username }, 201)
+    return jsonSuccess(
+      {
+        user: { id: user.id, username: user.username },
+        accessToken: accessToken.token,
+        refreshToken: refreshToken.token,
+        expiresIn: accessToken.expiresIn,
+      },
+      201
+    )
   })
 }

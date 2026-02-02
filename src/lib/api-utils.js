@@ -47,7 +47,7 @@ export const verifyOwnership = (resource, userId, resourceName = 'Resource') => 
   }
 }
 
-export const handleApiRequest = async (handler, cookies) => {
+export const handleApiRequest = async (handler) => {
   try {
     return await handler()
   } catch (error) {
@@ -73,16 +73,6 @@ export const handleApiRequest = async (handler, cookies) => {
     // Default error response
     return jsonError(error.message || 'Internal server error', 500)
   }
-}
-
-export const setSessionCookie = (cookies, sessionId, expiresAt) => {
-  cookies.set('session_id', sessionId, {
-    path: '/',
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    expires: new Date(expiresAt),
-  })
 }
 
 export const toCamelCase = (obj) => {

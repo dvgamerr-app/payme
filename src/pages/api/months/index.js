@@ -2,13 +2,12 @@ import { desc, eq, and } from 'drizzle-orm'
 import { db, schema } from '@/lib/db.js'
 import { requireAuth } from '@/lib/middleware.js'
 import { handleApiRequest, jsonSuccess, parseIntParam } from '@/lib/api-utils.js'
-import { copyFixedExpensesToMonth } from '@/lib/db-helpers.js'
 
-const { months, budgetCategories } = schema
+const { months } = schema
 
-export const GET = async ({ cookies, url }) => {
+export const GET = async ({ request, url }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const userId = user.id
 
     const yearParam = url.searchParams.get('year')
@@ -31,7 +30,6 @@ export const GET = async ({ cookies, url }) => {
     if (month < 1 || month > 12) {
       throw new Error('Month must be between 1 and 12')
     }
-    // If year and month provided, get or create that specific month
 
     // Try to find existing month
     const existingMonth = await db

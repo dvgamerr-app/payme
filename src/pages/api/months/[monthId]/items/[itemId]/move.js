@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { db, schema } from '@/lib/db.js'
 import { requireAuth } from '@/lib/middleware.js'
 import { handleApiRequest, jsonSuccess, parseIntParam, validateRequired } from '@/lib/api-utils.js'
@@ -20,9 +20,9 @@ const verifyItemOwnership = async (itemId, userId) => {
   return checkRows[0]
 }
 
-export const PUT = async ({ params, request, cookies }) => {
+export const PUT = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const itemId = parseIntParam(params.itemId, 'item ID')
     const body = await request.json()
     const { target_month_id } = body

@@ -1,23 +1,21 @@
 import { db, schema, nowSql } from '@/lib/db.js'
 import { eq } from 'drizzle-orm'
-import { handleApiRequest, jsonSuccess, jsonError, validateRequired } from '@/lib/api-utils.js'
+import { requireAuth } from '@/lib/middleware.js'
+import { handleApiRequest, jsonSuccess, validateRequired } from '@/lib/api-utils.js'
 
-export const GET = async ({ locals }) => {
+export const GET = async ({ request }) => {
   return handleApiRequest(async () => {
-    const userId = locals.user?.id
-    if (!userId) {
-      return jsonError('Unauthorized', 401)
-    }
+    const user = await requireAuth(request)
 
     let settings = await db.query.userSettings.findFirst({
-      where: eq(schema.userSettings.userId, userId),
+      where: eq(schema.userSettings.userId, user.id),
     })
 
     if (!settings) {
       const [newSettings] = await db
         .insert(schema.userSettings)
         .values({
-          userId,
+          userId: user.id,
           baseCurrency: 'THB',
           currencySymbol: '฿',
           payday: 'end',
@@ -34,20 +32,16 @@ export const GET = async ({ locals }) => {
   })
 }
 
-export const PUT = async ({ request, locals }) => {
+export const PUT = async ({ request }) => {
   return handleApiRequest(async () => {
-    const userId = locals.user?.id
-    if (!userId) {
-      return jsonError('Unauthorized', 401)
-    }
-
+    const user = await requireAuth(request)
     const body = await request.json()
     const { baseCurrency, currencySymbol, payday } = body
 
     validateRequired(body, ['baseCurrency', 'currencySymbol', 'payday'])
 
     const existing = await db.query.userSettings.findFirst({
-      where: eq(schema.userSettings.userId, userId),
+      where: eq(schema.userSettings.userId, user.id),
     })
 
     let settings
@@ -60,13 +54,13 @@ export const PUT = async ({ request, locals }) => {
           payday,
           updatedAt: nowSql,
         })
-        .where(eq(schema.userSettings.userId, userId))
+        .where(eq(schema.userSettings.userId, user.id))
         .returning()
     } else {
       ;[settings] = await db
         .insert(schema.userSettings)
         .values({
-          userId,
+          userId: user.id,
           baseCurrency,
           currencySymbol,
           payday,

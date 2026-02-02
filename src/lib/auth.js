@@ -1,15 +1,82 @@
 import bcrypt from 'bcrypt'
-import { and, eq, gt, lte } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import logger from './logger.js'
-import { db, nowSql, schema } from './db.js'
+import { db, schema } from './db.js'
 
-const { sessions, users, budgetCategories } = schema
+const { users, budgetCategories } = schema
 
 const SALT_ROUNDS = 10
-const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000 // 30 days
+const ACCESS_TOKEN_DURATION = 15 * 60 * 1000 // 15 minutes
+const REFRESH_TOKEN_DURATION = 30 * 24 * 60 * 60 * 1000 // 30 days
 
-const generateSessionId = () => {
-  return crypto.randomUUID()
+// Simple token format: base64(userId:expiresAt:signature)
+const SECRET_KEY = process.env.JWT_SECRET || 'payme-secret-key-change-in-production'
+
+const generateSignature = (data) => {
+  const encoder = new TextEncoder()
+  const dataBytes = encoder.encode(data + SECRET_KEY)
+  // Simple hash using crypto
+  let hash = 0
+  for (let i = 0; i < dataBytes.length; i++) {
+    hash = ((hash << 5) - hash + dataBytes[i]) | 0
+  }
+  return Math.abs(hash).toString(36)
+}
+
+export const generateAccessToken = (userId) => {
+  const expiresAt = Date.now() + ACCESS_TOKEN_DURATION
+  const data = `${userId}:${expiresAt}:access`
+  const signature = generateSignature(data)
+  const token = Buffer.from(`${data}:${signature}`).toString('base64url')
+  return { token, expiresAt, expiresIn: ACCESS_TOKEN_DURATION }
+}
+
+export const generateRefreshToken = (userId) => {
+  const expiresAt = Date.now() + REFRESH_TOKEN_DURATION
+  const data = `${userId}:${expiresAt}:refresh`
+  const signature = generateSignature(data)
+  const token = Buffer.from(`${data}:${signature}`).toString('base64url')
+  return { token, expiresAt, expiresIn: REFRESH_TOKEN_DURATION }
+}
+
+export const verifyToken = (token, expectedType = 'access') => {
+  try {
+    const decoded = Buffer.from(token, 'base64url').toString()
+    const parts = decoded.split(':')
+    if (parts.length !== 4) return null
+
+    const [userId, expiresAt, type, signature] = parts
+
+    // Check type
+    if (type !== expectedType) return null
+
+    // Check expiry
+    if (Date.now() > parseInt(expiresAt)) return null
+
+    // Verify signature
+    const data = `${userId}:${expiresAt}:${type}`
+    const expectedSignature = generateSignature(data)
+    if (signature !== expectedSignature) return null
+
+    return { userId: parseInt(userId), expiresAt: parseInt(expiresAt) }
+  } catch {
+    return null
+  }
+}
+
+export const getUserById = async (userId) => {
+  const rows = await db
+    .select({
+      id: users.id,
+      username: users.username,
+      savings: users.savings,
+      retirementSavings: users.retirementSavings,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+
+  return rows[0] ?? null
 }
 
 export const hashPassword = async (password) => {
@@ -18,51 +85,6 @@ export const hashPassword = async (password) => {
 
 export const verifyPassword = async (password, hash) => {
   return await bcrypt.compare(password, hash)
-}
-
-export const createSession = async (userId) => {
-  const sessionId = generateSessionId()
-  const expiresAt = new Date(Date.now() + SESSION_DURATION).toISOString()
-
-  await db.insert(sessions).values({
-    id: sessionId,
-    userId,
-    expiresAt,
-  })
-
-  return { sessionId, expiresAt }
-}
-
-export const getUserFromSession = async (sessionId) => {
-  if (!sessionId) return null
-
-  const rows = await db
-    .select({
-      id: users.id,
-      username: users.username,
-      savings: users.savings,
-      retirementSavings: users.retirementSavings,
-    })
-    .from(sessions)
-    .innerJoin(users, eq(users.id, sessions.userId))
-    .where(and(eq(sessions.id, sessionId), gt(sessions.expiresAt, nowSql)))
-    .limit(1)
-
-  return rows[0] ?? null
-}
-
-export const deleteSession = async (sessionId) => {
-  await db.delete(sessions).where(eq(sessions.id, sessionId))
-}
-
-export const cleanupExpiredSessions = async () => {
-  // drizzle-orm sqlite ไม่รองรับ .returning()
-  const result = await db.delete(sessions).where(lte(sessions.expiresAt, nowSql))
-  // result.changes (sqlite), result.rowCount (pg)
-  const count = result?.changes ?? result?.rowCount ?? 0
-  if (count > 0) {
-    logger.info({ count }, 'Cleaned up expired sessions')
-  }
 }
 
 export const registerUser = async (username, password) => {
@@ -121,13 +143,3 @@ export const loginUser = async (username, password) => {
 
   return { id: user.id, username: user.username }
 }
-
-// Run cleanup every 6 hours
-setInterval(
-  () => {
-    cleanupExpiredSessions().catch((error) =>
-      logger.error({ err: error }, 'Session cleanup failed')
-    )
-  },
-  6 * 60 * 60 * 1000
-)

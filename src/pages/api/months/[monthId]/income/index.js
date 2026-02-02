@@ -6,9 +6,9 @@ import { getMonthByIdForUser } from '@/lib/db-helpers.js'
 
 const { incomeEntries } = schema
 
-export const GET = async ({ params, cookies }) => {
+export const GET = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const monthId = parseIntParam(params.monthId, 'month ID')
 
     await getMonthByIdForUser(monthId, user.id)
@@ -28,9 +28,9 @@ export const GET = async ({ params, cookies }) => {
   })
 }
 
-export const POST = async ({ params, request, cookies }) => {
+export const POST = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const monthId = parseIntParam(params.monthId, 'month ID')
     const body = await request.json()
     const { label, amount } = body

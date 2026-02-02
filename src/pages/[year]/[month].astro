@@ -1,16 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro'
 import DashboardPage from '@/components/DashboardPage.svelte'
-import { getUserFromSession } from '@/lib/auth.js'
-
-// Check authentication
-const sessionId = Astro.cookies.get('session_id')?.value
-const user = await getUserFromSession(sessionId)
-
-// Redirect to login if not authenticated
-if (!user) {
-  return Astro.redirect('/login')
-}
 
 // Get year and month from URL params
 const { year, month } = Astro.params
@@ -23,10 +13,16 @@ const { year, month } = Astro.params
 <script>
   import { theme } from '@/stores/theme.js'
   import { auth } from '@/stores/auth.js'
+  import { isAuthenticated } from '@/lib/api.js'
 
-  // Initialize theme
-  theme.init()
+  // Check if authenticated, redirect to login if not
+  if (!isAuthenticated()) {
+    window.location.href = '/login'
+  } else {
+    // Initialize theme
+    theme.init()
 
-  // Initialize auth state
-  auth.checkAuth()
+    // Initialize auth state
+    auth.checkAuth()
+  }
 </script>

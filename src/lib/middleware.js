@@ -1,10 +1,20 @@
-import { getUserFromSession } from './auth.js'
+import { verifyToken, getUserById } from './auth.js'
 import { handleApiRequest, jsonError } from './api-utils.js'
 
-export const requireAuth = async (cookies) => {
-  const sessionId = cookies.get('session_id')?.value
-  const user = await getUserFromSession(sessionId)
+export const requireAuth = async (request) => {
+  const authHeader = request.headers.get('Authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    throw new Error('Unauthorized')
+  }
 
+  const token = authHeader.slice(7)
+  const decoded = verifyToken(token, 'access')
+
+  if (!decoded) {
+    throw new Error('Unauthorized')
+  }
+
+  const user = await getUserById(decoded.userId)
   if (!user) {
     throw new Error('Unauthorized')
   }
@@ -19,8 +29,8 @@ export const authResponse = (_error) => {
 export const withAuth = (handler) => {
   return async (context) => {
     return handleApiRequest(async () => {
-      const user = await requireAuth(context.cookies)
+      const user = await requireAuth(context.request)
       return handler({ ...context, user })
-    }, context.cookies)
+    })
   }
 }

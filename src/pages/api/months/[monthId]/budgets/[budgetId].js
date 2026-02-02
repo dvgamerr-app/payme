@@ -24,9 +24,9 @@ const verifyBudgetOwnership = async (budgetId, monthId, userId) => {
   }
 }
 
-export const PUT = async ({ params, request, cookies }) => {
+export const PUT = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const monthId = parseIntParam(params.monthId, 'month ID')
     const budgetId = parseIntParam(params.budgetId, 'budget ID')
     const body = await request.json()

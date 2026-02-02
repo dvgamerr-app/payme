@@ -24,9 +24,9 @@ const verifyIncomeOwnership = async (incomeId, monthId, userId) => {
   }
 }
 
-export const PUT = async ({ params, request, cookies }) => {
+export const PUT = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const monthId = parseIntParam(params.monthId, 'month ID')
     const id = parseIntParam(params.id, 'income ID')
     const body = await request.json()
@@ -59,9 +59,9 @@ export const PUT = async ({ params, request, cookies }) => {
   })
 }
 
-export const DELETE = async ({ params, cookies }) => {
+export const DELETE = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const monthId = parseIntParam(params.monthId, 'month ID')
     const id = parseIntParam(params.id, 'income ID')
 

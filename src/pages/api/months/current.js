@@ -6,9 +6,9 @@ import { copyFixedExpensesToMonth } from '@/lib/db-helpers.js'
 
 const { budgetCategories, monthlyBudgets, months } = schema
 
-export const GET = async ({ cookies }) => {
+export const GET = async ({ request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
 
     const now = new Date()
     const year = now.getFullYear()

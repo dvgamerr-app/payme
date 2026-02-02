@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm'
 import { db, schema } from '@/lib/db.js'
 import { requireAuth } from '@/lib/middleware.js'
-import { handleApiRequest, jsonSuccess, parseIntParam } from '@/lib/api-utils.js'
+import { handleApiRequest, jsonSuccess, jsonError, parseIntParam } from '@/lib/api-utils.js'
 import { getCategoryByIdForUser } from '@/lib/db-helpers.js'
 
 const { items, months } = schema
@@ -19,9 +19,9 @@ const verifyItemOwnership = async (itemId, monthId, userId) => {
   }
 }
 
-export const PUT = async ({ params, request, cookies }) => {
+export const PUT = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const monthId = parseIntParam(params.monthId, 'month ID')
     const itemId = parseIntParam(params.itemId, 'item ID')
     const body = await request.json()
@@ -40,7 +40,7 @@ export const PUT = async ({ params, request, cookies }) => {
     if (spent_on !== undefined) updates.spentOn = spent_on
 
     if (Object.keys(updates).length === 0) {
-      return ('No fields to update', 400)
+      return jsonError('No fields to update', 400)
     }
 
     await db.update(items).set(updates).where(eq(items.id, itemId))
@@ -62,9 +62,9 @@ export const PUT = async ({ params, request, cookies }) => {
   })
 }
 
-export const DELETE = async ({ params, cookies }) => {
+export const DELETE = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const monthId = parseIntParam(params.monthId, 'month ID')
     const itemId = parseIntParam(params.itemId, 'item ID')
 

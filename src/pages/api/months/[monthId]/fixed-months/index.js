@@ -2,13 +2,13 @@ import { and, asc, desc, eq } from 'drizzle-orm'
 import { db, schema } from '@/lib/db.js'
 import { requireAuth } from '@/lib/middleware.js'
 import { handleApiRequest, jsonSuccess, validateRequired, parseIntParam } from '@/lib/api-utils.js'
-import { getMonthByIdForUser, getNextDisplayOrder } from '@/lib/db-helpers.js'
+import { getMonthByIdForUser } from '@/lib/db-helpers.js'
 
 const { fixedMonths } = schema
 
-export const GET = async ({ params, cookies }) => {
+export const GET = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const monthId = parseIntParam(params.monthId, 'monthId')
 
     await getMonthByIdForUser(monthId, user.id)
@@ -32,9 +32,9 @@ export const GET = async ({ params, cookies }) => {
   })
 }
 
-export const POST = async ({ params, request, cookies }) => {
+export const POST = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const monthId = parseIntParam(params.monthId, 'monthId')
     const body = await request.json()
     const { name, amount } = body

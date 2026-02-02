@@ -2,9 +2,9 @@ import { requireAuth } from '@/lib/middleware.js'
 import { handleApiRequest, jsonSuccess, jsonError, parseIntParam } from '@/lib/api-utils.js'
 import { getMonthSummary } from '@/lib/db-helpers.js'
 
-export const GET = async ({ params, cookies }) => {
+export const GET = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const monthId = parseIntParam(params.id, 'month ID')
 
     const summary = await getMonthSummary(monthId, user.id)

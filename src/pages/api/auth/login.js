@@ -1,14 +1,8 @@
 import logger from '@/lib/logger.js'
-import { loginUser, createSession } from '@/lib/auth.js'
-import {
-  handleApiRequest,
-  jsonSuccess,
-  jsonError,
-  validateRequired,
-  setSessionCookie,
-} from '@/lib/api-utils.js'
+import { loginUser, generateAccessToken, generateRefreshToken } from '@/lib/auth.js'
+import { handleApiRequest, jsonSuccess, jsonError, validateRequired } from '@/lib/api-utils.js'
 
-export const POST = async ({ request, cookies }) => {
+export const POST = async ({ request }) => {
   return handleApiRequest(async () => {
     const body = await request.json()
     const { username, password } = body
@@ -17,11 +11,15 @@ export const POST = async ({ request, cookies }) => {
 
     try {
       const user = await loginUser(username, password)
-      const { sessionId, expiresAt } = await createSession(user.id)
+      const accessToken = generateAccessToken(user.id)
+      const refreshToken = generateRefreshToken(user.id)
 
-      setSessionCookie(cookies, sessionId, expiresAt)
-
-      return jsonSuccess({ id: user.id, username: user.username })
+      return jsonSuccess({
+        user: { id: user.id, username: user.username },
+        accessToken: accessToken.token,
+        refreshToken: refreshToken.token,
+        expiresIn: accessToken.expiresIn,
+      })
     } catch (error) {
       logger.warn({ err: error, username }, 'Login failed')
       return jsonError('Invalid credentials', 401)

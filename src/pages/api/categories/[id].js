@@ -6,9 +6,9 @@ import { verifyResourceOwnership } from '@/lib/db-helpers.js'
 
 const { budgetCategories } = schema
 
-export const PUT = async ({ params, request, cookies }) => {
+export const PUT = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const id = parseIntParam(params.id, 'category ID')
     const body = await request.json()
     const { label, default_amount } = body
@@ -40,9 +40,9 @@ export const PUT = async ({ params, request, cookies }) => {
   })
 }
 
-export const DELETE = async ({ params, cookies }) => {
+export const DELETE = async ({ params, request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const id = parseIntParam(params.id, 'category ID')
 
     await verifyResourceOwnership(budgetCategories, id, user.id, 'Category')

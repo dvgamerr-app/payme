@@ -5,9 +5,9 @@ import { handleApiRequest, jsonSuccess, validateRequired } from '@/lib/api-utils
 
 const { users } = schema
 
-export const GET = async ({ cookies }) => {
+export const GET = async ({ request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const rows = await db
       .select({ retirement_savings: users.retirementSavings })
       .from(users)
@@ -18,9 +18,9 @@ export const GET = async ({ cookies }) => {
   })
 }
 
-export const PUT = async ({ request, cookies }) => {
+export const PUT = async ({ request }) => {
   return handleApiRequest(async () => {
-    const user = await requireAuth(cookies)
+    const user = await requireAuth(request)
     const body = await request.json()
     const { retirement_savings } = body
 
