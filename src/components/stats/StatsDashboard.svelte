@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte'
+  import { get } from 'svelte/store'
   import Layout from '@/components/Layout.svelte'
   import TrendChart from './TrendChart.svelte'
   import CategoryBreakdown from './CategoryBreakdown.svelte'
@@ -13,6 +14,18 @@
     average_monthly_spending: 0,
     average_monthly_income: 0,
   }
+
+  onMount(async () => {
+    // Only load if not already loaded (e.g., via Layout preload)
+    const current = get(stats)
+    if (!current.data && !current.loading) {
+      try {
+        await stats.load()
+      } catch (err) {
+        console.error('Failed to load stats:', err)
+      }
+    }
+  })
 
   // Use store data if available, otherwise use SSR data
   $: statsData = $stats.data || data

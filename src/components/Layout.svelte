@@ -1,16 +1,14 @@
 <script>
-  import { Moon, Sun, LogOut, ChartColumn, Settings, ArrowLeft, Loader2 } from 'lucide-svelte'
+  import { Moon, Sun, LogOut, ChartColumn, Settings, ArrowLeft } from 'lucide-svelte'
   import { onMount } from 'svelte'
   import { theme } from '@/stores/theme.js'
   import { auth } from '@/stores/auth.js'
-  import { stats } from '@/stores/stats.js'
   import SettingsModal from './SettingsModal.svelte'
 
   export let showBack = false
 
   let isSettingsOpen = false
   let settingsModal
-  let isLoadingStats = false
 
   export const openSettingsToCategories = () => {
     isSettingsOpen = true
@@ -35,18 +33,8 @@
     isSettingsOpen = false
   }
 
-  async function goToStats() {
-    isLoadingStats = true
-    try {
-      await stats.load()
-      window.location.href = '/stats'
-    } catch (error) {
-      console.error('Failed to load stats:', error)
-      // Navigate anyway, page will fetch fresh data
-      window.location.href = '/stats'
-    } finally {
-      isLoadingStats = false
-    }
+  function goToStats() {
+    window.location.href = '/stats'
   }
 </script>
 
@@ -78,15 +66,10 @@
         {#if user}
           <button
             on:click={goToStats}
-            disabled={isLoadingStats}
-            class="hover:bg-accent inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors disabled:cursor-wait disabled:opacity-50"
+            class="hover:bg-accent inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors"
             title="Statistics"
           >
-            {#if isLoadingStats}
-              <Loader2 size={16} class="animate-spin" />
-            {:else}
-              <ChartColumn size={16} />
-            {/if}
+            <ChartColumn size={16} />
           </button>
           <button
             on:click={openSettings}
