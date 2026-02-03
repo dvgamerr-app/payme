@@ -55,7 +55,8 @@ const refreshAccessToken = async () => {
   }
 
   const data = await response.json()
-  setTokens(data.accessToken, null, data.expiresIn)
+  // Save both new access token and rotated refresh token
+  setTokens(data.accessToken, data.refreshToken, data.expiresIn)
   return data.accessToken
 }
 
@@ -160,7 +161,11 @@ export const api = {
     },
     logout: async () => {
       try {
-        await request('/auth/logout', { method: 'POST' })
+        const refreshToken = getRefreshToken()
+        await request('/auth/logout', {
+          method: 'POST',
+          body: JSON.stringify({ refreshToken }),
+        })
       } finally {
         stopTokenRefresh()
         clearTokens()

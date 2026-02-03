@@ -181,11 +181,13 @@ export const sessions = pgTable(
     userId: integer('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   },
   (table) => ({
     byUser: index('idx_sessions_user').on(table.userId),
     byExpires: index('idx_sessions_expires').on(table.expiresAt),
+    byToken: uniqueIndex('idx_sessions_token').on(table.token),
   })
 )

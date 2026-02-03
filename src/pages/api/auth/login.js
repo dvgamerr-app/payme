@@ -1,5 +1,5 @@
 import logger from '@/lib/logger.js'
-import { loginUser, generateAccessToken, generateRefreshToken } from '@/lib/auth.js'
+import { loginUser, generateAccessToken, createRefreshToken } from '@/lib/auth.js'
 import { handleApiRequest, jsonSuccess, jsonError, validateRequired } from '@/lib/api-utils.js'
 
 export const POST = async ({ request }) => {
@@ -12,7 +12,7 @@ export const POST = async ({ request }) => {
     try {
       const user = await loginUser(username, password)
       const accessToken = generateAccessToken(user.id)
-      const refreshToken = generateRefreshToken(user.id)
+      const refreshToken = await createRefreshToken(user.id)
 
       return jsonSuccess({
         user: { id: user.id, username: user.username },

@@ -1,4 +1,4 @@
-import { registerUser, generateAccessToken, generateRefreshToken } from '@/lib/auth.js'
+import { registerUser, generateAccessToken, createRefreshToken } from '@/lib/auth.js'
 import { handleApiRequest, jsonSuccess, jsonError, validateRequired } from '@/lib/api-utils.js'
 
 export const POST = async ({ request }) => {
@@ -14,7 +14,7 @@ export const POST = async ({ request }) => {
 
     const user = await registerUser(username, password)
     const accessToken = generateAccessToken(user.id)
-    const refreshToken = generateRefreshToken(user.id)
+    const refreshToken = await createRefreshToken(user.id)
 
     return jsonSuccess(
       {

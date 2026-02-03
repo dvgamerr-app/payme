@@ -204,6 +204,7 @@ export const sessions = sqliteTable(
     userId: integer('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
     createdAt: text('created_at')
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
@@ -212,5 +213,6 @@ export const sessions = sqliteTable(
   (table) => ({
     byUser: index('idx_sessions_user').on(table.userId),
     byExpires: index('idx_sessions_expires').on(table.expiresAt),
+    byToken: uniqueIndex('idx_sessions_token').on(table.token),
   })
 )

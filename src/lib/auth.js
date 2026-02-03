@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm'
 import logger from './logger.js'
 import { db, schema } from './db.js'
 
-const { users, budgetCategories } = schema
+const { users, budgetCategories, sessions } = schema
 
 const SALT_ROUNDS = 10
 const ACCESS_TOKEN_DURATION = 15 * 60 * 1000 // 15 minutes
@@ -62,6 +62,100 @@ export const verifyToken = (token, expectedType = 'access') => {
   } catch {
     return null
   }
+}
+
+// Generate a random token ID for session identification
+const generateTokenId = () => {
+  const bytes = new Uint8Array(32)
+  crypto.getRandomValues(bytes)
+  return Buffer.from(bytes).toString('base64url')
+}
+
+// Create a new refresh token and store in database
+export const createRefreshToken = async (userId) => {
+  const tokenId = generateTokenId()
+  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_DURATION)
+
+  // Create signed token containing the tokenId
+  const data = `${userId}:${tokenId}:${expiresAt.getTime()}:refresh`
+  const signature = generateSignature(data)
+  const token = Buffer.from(`${data}:${signature}`).toString('base64url')
+
+  // Store in database
+  await db.insert(sessions).values({
+    id: tokenId,
+    userId,
+    token: tokenId, // Store the tokenId for lookup
+    expiresAt: expiresAt.toISOString(),
+  })
+
+  return { token, expiresIn: REFRESH_TOKEN_DURATION }
+}
+
+// Validate refresh token and rotate - returns new token or null
+export const validateAndRotateRefreshToken = async (token) => {
+  try {
+    const decoded = Buffer.from(token, 'base64url').toString()
+    const parts = decoded.split(':')
+    if (parts.length !== 5) return null
+
+    const [userId, tokenId, expiresAt, type, signature] = parts
+
+    // Check type
+    if (type !== 'refresh') return null
+
+    // Check expiry
+    if (Date.now() > parseInt(expiresAt)) return null
+
+    // Verify signature
+    const data = `${userId}:${tokenId}:${expiresAt}:${type}`
+    const expectedSignature = generateSignature(data)
+    if (signature !== expectedSignature) return null
+
+    // Check if token exists in database (not already used)
+    const rows = await db.select().from(sessions).where(eq(sessions.token, tokenId)).limit(1)
+
+    const session = rows[0]
+    if (!session) {
+      // Token was already used or revoked - possible token theft!
+      logger.warn({ userId }, 'Refresh token reuse attempt detected')
+      return null
+    }
+
+    // Delete the old token (single use)
+    await db.delete(sessions).where(eq(sessions.id, tokenId))
+
+    // Create and return new token
+    const newToken = await createRefreshToken(parseInt(userId))
+    return {
+      userId: parseInt(userId),
+      newRefreshToken: newToken.token,
+      expiresIn: newToken.expiresIn,
+    }
+  } catch (err) {
+    logger.error({ err }, 'Error validating refresh token')
+    return null
+  }
+}
+
+// Revoke a specific refresh token
+export const revokeRefreshToken = async (token) => {
+  try {
+    const decoded = Buffer.from(token, 'base64url').toString()
+    const parts = decoded.split(':')
+    if (parts.length !== 5) return false
+
+    const [, tokenId] = parts
+    await db.delete(sessions).where(eq(sessions.id, tokenId))
+    return true
+  } catch {
+    return false
+  }
+}
+
+// Revoke all refresh tokens for a user (for security purposes)
+export const revokeAllUserTokens = async (userId) => {
+  await db.delete(sessions).where(eq(sessions.userId, userId))
 }
 
 export const getUserById = async (userId) => {
