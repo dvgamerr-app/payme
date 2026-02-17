@@ -204,7 +204,7 @@
     {#if !isReadOnly && !isAdding}
       <button
         on:click={startAdd}
-        class="hover:bg-accent flex h-7 w-7 items-center justify-center rounded-md transition-colors"
+        class="hover:bg-accent flex h-7 w-7 items-center justify-center transition-colors"
         title="Add transaction"
       >
         <Plus size={16} />
@@ -218,7 +218,7 @@
       <div
         role="button"
         tabindex="0"
-        class="border-border hover:bg-accent/30 rounded-lg border p-4 transition-colors"
+        class="border-border hover:bg-accent/30 border p-4 transition-colors"
         on:click={() => !isReadOnly && !isAdding && !editingId && startEdit(item)}
         on:keydown={(e) =>
           e.key === 'Enter' && !isReadOnly && !isAdding && !editingId && startEdit(item)}
@@ -235,9 +235,7 @@
         <div class="flex items-center justify-between">
           <div>
             {#if item.category_label}
-              <span
-                class="bg-accent text-accent-foreground inline-block rounded-full px-2.5 py-1 text-sm"
-              >
+              <span class="bg-accent text-accent-foreground inline-block px-2.5 py-1 text-sm">
                 {item.category_label}
               </span>
             {:else}
@@ -248,13 +246,13 @@
             <div class="relative">
               <button
                 on:click|stopPropagation={() => toggleDropdown(item.id)}
-                class="hover:bg-accent rounded p-2"
+                class="hover:bg-accent p-2"
               >
                 <EllipsisVertical size={16} />
               </button>
               {#if openDropdownId === item.id}
                 <div
-                  class="bg-background border-border absolute right-0 z-10 mt-1 w-40 rounded-md border shadow-lg"
+                  class="bg-background border-border absolute right-0 z-10 mt-1 w-40 border shadow-lg"
                 >
                   <button
                     on:click={() => openMoveModal(item)}
@@ -286,7 +284,7 @@
   </div>
 
   <!-- Desktop Table View -->
-  <table class="hidden w-full text-sm md:table">
+  <table class="hidden min-h-50 w-full text-sm md:table">
     <thead>
       <tr class="border-border border-b">
         <th class="text-muted-foreground w-22 py-3 text-left text-xs font-medium">Date</th>
@@ -387,9 +385,7 @@
             <td class="text-foreground py-3 text-sm">{item.description}</td>
             <td class="py-3">
               {#if item.category_label}
-                <span
-                  class="bg-accent text-accent-foreground inline-block rounded-full px-2 py-0.5 text-xs"
-                >
+                <span class="bg-accent text-accent-foreground inline-block px-2 py-0.5 text-xs">
                   {item.category_label}
                 </span>
               {:else}
@@ -405,14 +401,14 @@
                   <div class="relative">
                     <button
                       on:click|stopPropagation={() => toggleDropdown(item.id)}
-                      class="hover:bg-sand-200 dark:hover:bg-charcoal-800 rounded p-1"
+                      class="hover:bg-sand-200 dark:hover:bg-charcoal-800 p-1"
                       disabled={isAdding || editingId}
                     >
                       <EllipsisVertical size={14} />
                     </button>
                     {#if openDropdownId === item.id}
                       <div
-                        class="bg-background border-border absolute right-0 z-10 mt-1 w-40 rounded-md border shadow-lg"
+                        class="bg-background border-border absolute right-0 z-10 mt-1 w-40 border shadow-lg"
                       >
                         <button
                           on:click={() => openMoveModal(item)}
@@ -497,13 +493,13 @@
     <div class="flex justify-end gap-2 pt-2">
       <button
         on:click={resetForm}
-        class="hover:bg-accent text-foreground rounded-md px-4 py-2 text-sm transition-colors"
+        class="hover:bg-accent text-foreground px-4 py-2 text-sm transition-colors"
       >
         Cancel
       </button>
       <button
         on:click={() => (modalMode === 'add' ? handleAdd() : handleUpdate(editingId))}
-        class="bg-foreground text-background rounded-md px-4 py-2 text-sm transition-opacity hover:opacity-90"
+        class="bg-foreground text-background px-4 py-2 text-sm transition-opacity hover:opacity-90"
         disabled={!description || !amount}
       >
         {modalMode === 'add' ? 'Add' : 'Update'}
@@ -516,7 +512,7 @@
   <div class="space-y-4">
     <p class="text-muted-foreground text-sm">Select the month to move this transaction to:</p>
     {#if selectedItemToMove}
-      <div class="bg-accent/50 rounded-md p-3">
+      <div class="bg-accent/50 p-3">
         <p class="text-foreground text-xs font-medium">{selectedItemToMove.description}</p>
         <p class="text-muted-foreground text-xs">
           {formatCurrency(selectedItemToMove.amount, currencySymbol)}
@@ -532,13 +528,13 @@
     <div class="flex justify-end gap-2">
       <button
         on:click={() => (showMoveModal = false)}
-        class="hover:bg-accent text-foreground rounded-md px-4 py-2 text-sm transition-colors"
+        class="hover:bg-accent text-foreground px-4 py-2 text-sm transition-colors"
       >
         Cancel
       </button>
       <button
         on:click={handleMoveToMonth}
-        class="bg-foreground text-background rounded-md px-4 py-2 text-sm transition-opacity hover:opacity-90"
+        class="bg-foreground text-background px-4 py-2 text-sm transition-opacity hover:opacity-90"
         disabled={!targetMonthId || targetMonthId === monthId.toString()}
       >
         Move

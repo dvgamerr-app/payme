@@ -82,15 +82,13 @@
   ]
 </script>
 
-<Modal {isOpen} {onClose} title="Settings" size="xl" noScroll>
-  <div class="flex h-full flex-col gap-4 md:flex-row">
-    <!-- Tabs - Horizontal on mobile, Sidebar on desktop -->
-    <div
-      class="border-border flex shrink-0 gap-1 overflow-x-auto border-b pb-2 md:w-40 md:flex-col md:border-r md:border-b-0 md:pr-3 md:pb-0"
-    >
+<Modal {isOpen} {onClose} title="Settings" variant="slide" noScroll>
+  <div class="flex h-full flex-col gap-4">
+    <!-- Tabs - Horizontal style -->
+    <div class="border-border flex shrink-0 gap-1 overflow-x-auto border-b pb-2">
       {#each tabs as tab}
         <button
-          class="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors md:px-2.5 {activeTab ===
+          class="flex shrink-0 items-center gap-2 px-3 py-2 text-left transition-colors {activeTab ===
           tab.id
             ? 'bg-accent text-foreground font-medium'
             : 'text-muted-foreground hover:bg-secondary/50'}"
@@ -103,7 +101,7 @@
     </div>
 
     <!-- Content (scrollable) -->
-    <div class="flex-1 overflow-y-auto px-1 md:px-0">
+    <div class="flex-1 overflow-y-auto px-1">
       {#if activeTab === 'general'}
         <div class="flex flex-col gap-6">
           <p class="text-muted-foreground -mt-2 text-[0.9375rem]">
@@ -112,17 +110,17 @@
 
           <div class="flex flex-col gap-4">
             <h3 class="m-0 text-[0.9375rem] font-semibold">Currency</h3>
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div class="grid grid-cols-1 gap-2">
               {#each currencies as currency}
                 <button
-                  class="flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors {selectedCurrency ===
+                  class="flex items-center gap-3 border px-3 py-2.5 text-left transition-colors {selectedCurrency ===
                   currency.code
                     ? 'border-[#d4a574] bg-linear-to-br from-[#d4a574]/10 to-[#d4a574]/5'
                     : 'border-border hover:border-muted-foreground hover:bg-secondary/50'}"
                   on:click={() => selectCurrency(currency)}
                 >
                   <span
-                    class="bg-muted flex h-8 w-8 items-center justify-center rounded-md font-mono text-sm font-medium"
+                    class="bg-muted flex h-8 w-8 items-center justify-center font-mono text-sm font-medium"
                   >
                     {currency.symbol}
                   </span>
@@ -137,10 +135,10 @@
 
           <div class="flex flex-col gap-4">
             <h3 class="m-0 text-[0.9375rem] font-semibold">วันเงินเดือนออก (Payday)</h3>
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div class="grid grid-cols-1 gap-2">
               {#each paydayOptions as option}
                 <button
-                  class="flex flex-col items-center gap-1 rounded-lg border px-3 py-3 transition-colors {selectedPayday ===
+                  class="flex flex-col items-center gap-1 border px-3 py-3 transition-colors {selectedPayday ===
                   option.value
                     ? 'border-[#d4a574] bg-linear-to-br from-[#d4a574]/10 to-[#d4a574]/5'
                     : 'border-border hover:border-muted-foreground hover:bg-secondary/50'}"

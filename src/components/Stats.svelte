@@ -123,7 +123,7 @@
           </h4>
           <div class="space-y-2">
             {#each trendData as month}
-              <div class="bg-sand-100 dark:bg-charcoal-800 rounded p-3">
+              <div class="bg-sand-100 dark:bg-charcoal-800 p-3">
                 <div class="text-charcoal-600 dark:text-charcoal-400 mb-2 text-xs font-medium">
                   {month.name}
                 </div>

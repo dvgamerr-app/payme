@@ -114,7 +114,7 @@
     <h3 class="text-foreground text-sm font-semibold">Budget</h3>
     <button
       on:click={() => (isManaging = true)}
-      class="hover:bg-accent flex h-7 w-7 items-center justify-center rounded-md transition-colors"
+      class="hover:bg-accent flex h-7 w-7 items-center justify-center transition-colors"
     >
       <Settings size={16} />
     </button>
@@ -161,7 +161,7 @@
                   <button
                     on:click={() => isMobile && startEditBudget(budget)}
                     on:dblclick={() => !isMobile && startEditBudget(budget)}
-                    class="hover:bg-accent rounded p-1"
+                    class="hover:bg-accent p-1"
                   >
                     <Pen size={12} />
                   </button>
@@ -202,7 +202,7 @@
           >
           <div
             id="budget-category"
-            class="text-foreground border-border bg-muted rounded-md border px-3 py-2 text-sm"
+            class="text-foreground border-border bg-muted border px-3 py-2 text-sm"
           >
             {budget.category_label}
           </div>
@@ -228,13 +228,13 @@
         <div class="flex justify-end gap-2 pt-2">
           <button
             on:click={cancelEdit}
-            class="hover:bg-accent text-foreground rounded-md px-4 py-2 text-sm transition-colors"
+            class="hover:bg-accent text-foreground px-4 py-2 text-sm transition-colors"
           >
             Cancel
           </button>
           <button
             on:click={() => handleUpdateBudget(editingBudgetId)}
-            class="bg-foreground text-background rounded-md px-4 py-2 text-sm transition-opacity hover:opacity-90"
+            class="bg-foreground text-background px-4 py-2 text-sm transition-opacity hover:opacity-90"
             disabled={!amount}
           >
             Update

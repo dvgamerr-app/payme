@@ -18,6 +18,7 @@
 - Reuse-first: เช็ค **`src/components/ui/`** ก่อนสร้างใหม่
 - ห้ามทำ `<input>`, `<button>`, modal เอง → ใช้ `Input.svelte`, `Button.svelte`, `Modal.svelte`
 - Styling = **Tailwind + theme tokens** (`text-foreground`, `bg-background`) รองรับ **dark/light**
+- **Design: No border-radius** — ห้ามใช้ `rounded-*` classes ทั้งหมด (sharp corners only)
 
 ### API Standard Pattern
 

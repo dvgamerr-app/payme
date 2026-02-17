@@ -208,7 +208,7 @@
         id="{selectId}-listbox"
         role="listbox"
         aria-label={label || 'Select options'}
-        class="bg-card border-border absolute top-full left-0 z-50 mt-1 max-h-60 w-full overflow-auto rounded-xs border shadow-lg"
+        class="bg-card border-border absolute top-full left-0 z-50 mt-1 max-h-60 w-full overflow-auto border shadow-lg"
         use:scrollToHighlighted={highlightedIndex}
       >
         {#each options as opt, index (opt.value)}

@@ -24,7 +24,7 @@
     {#if onAnalyzeClick}
       <button
         on:click={onAnalyzeClick}
-        class="hover:bg-sand-200 dark:hover:bg-charcoal-700 rounded p-0.5 transition-colors"
+        class="hover:bg-sand-200 dark:hover:bg-charcoal-700 p-0.5 transition-colors"
         title="Why this amount?"
       >
         <HelpCircle

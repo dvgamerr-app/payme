@@ -86,7 +86,7 @@
       <button
         on:click={() => isMobile && startEdit()}
         on:dblclick={() => !isMobile && startEdit()}
-        class="hover:bg-sand-200 dark:hover:bg-charcoal-700 rounded p-0.5 transition-colors"
+        class="hover:bg-sand-200 dark:hover:bg-charcoal-700 p-0.5 transition-colors"
       >
         <Pencil size={12} class="text-charcoal-400" />
       </button>

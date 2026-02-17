@@ -61,7 +61,7 @@
 <Modal bind:isOpen onClose={handleClose} title="Budget Analysis">
   <div class="space-y-6">
     {#if isOnTrack}
-      <div class="bg-sage-100 dark:bg-sage-900/30 flex items-center gap-3 rounded p-4">
+      <div class="bg-sage-100 dark:bg-sage-900/30 flex items-center gap-3 p-4">
         <PartyPopper class="text-sage-600 shrink-0" size={24} />
         <div>
           <p class="text-sage-700 dark:text-sage-400 font-semibold">
@@ -81,7 +81,7 @@
         </div>
       </div>
     {:else}
-      <div class="bg-terracotta-100 dark:bg-terracotta-900/30 flex items-center gap-3 rounded p-4">
+      <div class="bg-terracotta-100 dark:bg-terracotta-900/30 flex items-center gap-3 p-4">
         <AlertCircle class="text-terracotta-600 shrink-0" size={24} />
         <div>
           <p class="text-terracotta-700 dark:text-terracotta-400 font-semibold">

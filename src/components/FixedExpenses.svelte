@@ -164,7 +164,7 @@
     <h3 class="text-foreground text-sm font-semibold tracking-wide uppercase">Fixed</h3>
     <button
       on:click={startAdd}
-      class="hover:bg-accent flex h-7 w-7 items-center justify-center rounded-md transition-colors"
+      class="hover:bg-accent flex h-7 w-7 items-center justify-center transition-colors"
     >
       <Plus size={16} />
     </button>
@@ -202,7 +202,7 @@
             <button
               on:click={() => isMobile && startEdit(expense)}
               on:dblclick={() => !isMobile && startEdit(expense)}
-              class="text-foreground hover:bg-muted flex flex-1 items-center justify-between rounded-[0.5em] text-left text-sm
+              class="text-foreground hover:bg-muted flex flex-1 items-center justify-between text-left text-sm
               {editingId || isAdding ? 'pr-3 pl-4' : 'px-3'}
               {isMobile ? 'py-3' : 'py-2'}"
             >
@@ -311,13 +311,13 @@
     <div class="flex justify-end gap-2 pt-2">
       <button
         on:click={cancelEdit}
-        class="hover:bg-accent text-foreground rounded-md px-4 py-2 text-sm transition-colors"
+        class="hover:bg-accent text-foreground px-4 py-2 text-sm transition-colors"
       >
         Cancel
       </button>
       <button
         on:click={() => (modalMode === 'add' ? handleAdd() : handleUpdate(editingId))}
-        class="bg-foreground text-background rounded-md px-4 py-2 text-sm transition-opacity hover:opacity-90"
+        class="bg-foreground text-background px-4 py-2 text-sm transition-opacity hover:opacity-90"
         disabled={!label || !amount}
       >
         {modalMode === 'add' ? 'Add' : 'Update'}

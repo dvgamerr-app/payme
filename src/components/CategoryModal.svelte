@@ -108,7 +108,7 @@
     {#if !isAdding && !editingId}
       <button
         on:click={() => (isAdding = true)}
-        class="border-border hover:bg-accent flex w-full items-center gap-2 rounded-md border border-dashed px-4 py-3 transition-colors"
+        class="border-border hover:bg-accent flex w-full items-center gap-2 border border-dashed px-4 py-3 transition-colors"
       >
         <Plus size={16} />
         <span class="text-sm">Add New Category</span>
@@ -164,14 +164,14 @@
             <div class="flex gap-1">
               <button
                 on:dblclick={() => startEdit(category)}
-                class="hover:bg-sand-200 dark:hover:bg-charcoal-800 rounded p-1"
+                class="hover:bg-sand-200 dark:hover:bg-charcoal-800 p-1"
                 disabled={isAdding || editingId}
               >
                 <Edit2 size={14} />
               </button>
               <button
                 on:click={() => handleDelete(category.id)}
-                class="text-terracotta-500 hover:bg-terracotta-100 dark:hover:bg-charcoal-800 rounded p-1"
+                class="text-terracotta-500 hover:bg-terracotta-100 dark:hover:bg-charcoal-800 p-1"
                 disabled={isAdding || editingId}
               >
                 <Trash2 size={14} />

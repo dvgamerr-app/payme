@@ -28,11 +28,11 @@
     <h3 class="text-foreground text-sm font-semibold tracking-wide uppercase">Monthly Trends</h3>
     <div class="flex gap-4 text-xs">
       <div class="flex items-center gap-1.5">
-        <div class="bg-success h-2.5 w-2.5 rounded-full"></div>
+        <div class="bg-success h-2.5 w-2.5"></div>
         <span class="text-muted-foreground">Income</span>
       </div>
       <div class="flex items-center gap-1.5">
-        <div class="bg-destructive h-2.5 w-2.5 rounded-full"></div>
+        <div class="bg-destructive h-2.5 w-2.5"></div>
         <span class="text-muted-foreground">Expenses</span>
       </div>
     </div>

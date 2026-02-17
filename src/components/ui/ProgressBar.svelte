@@ -22,9 +22,9 @@
 </script>
 
 <div class="space-y-1">
-  <div class="bg-muted h-1.5 overflow-hidden rounded-full">
+  <div class="bg-muted h-1.5 overflow-hidden">
     <div
-      class="h-full transition-all duration-300 {getColor()} rounded-full"
+      class="h-full transition-all duration-300 {getColor()}"
       style="width: {Math.min(percentage, 100)}%"
     ></div>
   </div>

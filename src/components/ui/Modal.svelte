@@ -80,10 +80,7 @@
     <div
       class="bg-card relative {isMobile || variant === 'slide'
         ? 'animate-slideIn h-full w-full md:h-full md:w-[480px] md:max-w-[90vw]'
-        : 'animate-fadeIn mx-4 w-full rounded-2xl ' +
-          sizeClasses[size]} overflow-hidden shadow-md {isMobile || variant === 'slide'
-        ? 'rounded-t-2xl md:rounded-l-2xl md:rounded-r-none'
-        : ''}"
+        : 'animate-fadeIn mx-4 w-full ' + sizeClasses[size]} overflow-hidden shadow-md"
       style={isMobile || variant === 'slide' ? '' : 'height: 600px; max-height: 90vh;'}
     >
       <div class="flex h-full flex-col">
@@ -97,7 +94,7 @@
           {/if}
           <button
             on:click={handleClose}
-            class="hover:bg-accent ml-auto rounded-lg p-1.5 transition-colors"
+            class="hover:bg-accent ml-auto p-1.5 transition-colors"
             aria-label="Close modal"
           >
             <X size={20} />

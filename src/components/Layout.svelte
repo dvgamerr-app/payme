@@ -45,7 +45,7 @@
         {#if showBack}
           <a
             href="/"
-            class="hover:bg-accent -ml-2 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors"
+            class="hover:bg-accent -ml-2 inline-flex h-9 w-9 cursor-pointer items-center justify-center transition-colors"
             title="Back to Dashboard"
           >
             <ArrowLeft size={18} />
@@ -53,27 +53,21 @@
         {/if}
         <div>
           <h1 class="text-xl font-bold md:text-2xl">Payme</h1>
-          <p class="text-muted-foreground hidden text-sm sm:block">
-            Track your family's money.{#if user}
-              Hi, <span
-                class="bg-primary text-primary-foreground rounded px-1 py-0.5 text-sm font-medium uppercase"
-                >{user.username}</span
-              >.{/if}
-          </p>
+          <p class="text-muted-foreground hidden text-sm sm:block">Track your family's money.</p>
         </div>
       </div>
       <div class="flex items-center gap-1">
         {#if user}
           <button
             on:click={goToStats}
-            class="hover:bg-accent inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors"
+            class="hover:bg-accent inline-flex h-9 w-9 cursor-pointer items-center justify-center transition-colors"
             title="Statistics"
           >
             <ChartColumn size={16} />
           </button>
           <button
             on:click={openSettings}
-            class="hover:bg-accent inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors"
+            class="hover:bg-accent inline-flex h-9 w-9 cursor-pointer items-center justify-center transition-colors"
             title="Settings"
           >
             <Settings size={16} />
@@ -81,7 +75,7 @@
         {/if}
         <button
           on:click={() => theme.toggle()}
-          class="hover:bg-accent inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors"
+          class="hover:bg-accent inline-flex h-9 w-9 cursor-pointer items-center justify-center transition-colors"
           title="Toggle theme"
         >
           {#if isDark}
@@ -94,7 +88,7 @@
         {#if user}
           <button
             on:click={() => auth.logout()}
-            class="hover:bg-accent inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors"
+            class="hover:bg-accent inline-flex h-9 w-9 cursor-pointer items-center justify-center transition-colors"
             title="Logout"
           >
             <LogOut size={16} />

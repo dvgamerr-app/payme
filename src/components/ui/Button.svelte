@@ -12,7 +12,7 @@
   export let disabled = false
 
   const baseStyles =
-    'inline-flex items-center justify-center font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg'
+    'inline-flex items-center justify-center font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
 
   const variants = {
     primary: 'bg-primary text-primary-foreground hover:opacity-90',

@@ -33,9 +33,9 @@
             </span>
           </div>
           <!-- Progress Bar -->
-          <div class="bg-secondary h-1.5 w-full overflow-hidden rounded-full">
+          <div class="bg-secondary h-1.5 w-full overflow-hidden">
             <div
-              class="bg-primary h-full rounded-full transition-all duration-500"
+              class="bg-primary h-full transition-all duration-500"
               style="width: {(item.current_month_spent / maxSpent) * 100}%"
             ></div>
           </div>

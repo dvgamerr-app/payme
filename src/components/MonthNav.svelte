@@ -119,7 +119,7 @@
   <div class="flex items-center gap-2">
     <button
       on:click={goPrev}
-      class="hover:bg-accent flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors disabled:cursor-default disabled:opacity-20"
+      class="hover:bg-accent flex h-8 w-8 cursor-pointer items-center justify-center transition-colors disabled:cursor-default disabled:opacity-20"
     >
       <ChevronLeft size={18} />
     </button>
@@ -130,7 +130,7 @@
     <button
       on:click={goNext}
       disabled={nextDisabled}
-      class="hover:bg-accent flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors disabled:cursor-default disabled:opacity-20"
+      class="hover:bg-accent flex h-8 w-8 cursor-pointer items-center justify-center transition-colors disabled:cursor-default disabled:opacity-20"
     >
       <ChevronRight size={18} />
     </button>

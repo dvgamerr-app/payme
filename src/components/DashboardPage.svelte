@@ -2,20 +2,14 @@
   import { onMount } from 'svelte'
   import { fade, fly } from 'svelte/transition'
   import { api } from '@/lib/api.js'
-  import { settings } from '@/stores/settings.js'
   import Layout from './Layout.svelte'
   import MonthNav from './MonthNav.svelte'
   import Summary from './Summary.svelte'
-  import SavingsCard from './SavingsCard.svelte'
-  import RetirementSavingsCard from './RetirementSavingsCard.svelte'
-  import ProjectedSavingsCard from './ProjectedSavingsCard.svelte'
   import VarianceModal from './VarianceModal.svelte'
   import IncomeSection from './IncomeSection.svelte'
   import FixedExpenses from './FixedExpenses.svelte'
   import FixedMonths from './FixedMonths.svelte'
-  // import BudgetSection from './BudgetSection.svelte'
   import ItemsSection from './ItemsSection.svelte'
-  import Stats from './Stats.svelte'
 
   export let year = undefined
   export let month = undefined
