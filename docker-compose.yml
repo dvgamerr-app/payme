@@ -1,10 +1,9 @@
 services:
   payme:
     build: .
-    container_name: payme
     restart: unless-stopped
     ports:
-      - '3001:3001'
+      - "3001:3001"
     volumes:
       - payme_data:/data
     environment:
@@ -12,5 +11,18 @@ services:
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
       - PORT=3001
 
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=payme_user
+      - POSTGRES_PASSWORD=securepassword
+      - POSTGRES_DB=payme
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
 volumes:
   payme_data:
+  postgres_data:
