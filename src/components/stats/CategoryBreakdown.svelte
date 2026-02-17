@@ -18,7 +18,7 @@
 <Card>
   <div class="mb-4 flex items-center justify-between">
     <h3 class="text-foreground text-sm font-semibold tracking-wide uppercase">
-      Spending by Category
+      Spending by Category (This Year)
     </h3>
   </div>
 
@@ -42,7 +42,7 @@
           <!-- Change Stats -->
           {#if item.change_amount !== 0}
             <div class="text-muted-foreground flex items-center justify-end gap-1 text-[10px]">
-              <span>vs Last Month:</span>
+              <span>vs Last Year:</span>
               <span class={item.change_amount > 0 ? 'text-destructive' : 'text-success'}>
                 {item.change_amount > 0 ? '+' : ''}{formatCurrency(
                   item.change_amount,

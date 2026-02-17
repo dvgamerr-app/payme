@@ -8,12 +8,7 @@ export async function getStatsData(user) {
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1
 
-  let prevYear = currentYear
-  let prevMonth = currentMonth - 1
-  if (prevMonth === 0) {
-    prevMonth = 12
-    prevYear--
-  }
+  const prevYear = currentYear - 1
 
   const categories = await db
     .select({ id: budgetCategories.id, label: budgetCategories.label })
@@ -21,6 +16,7 @@ export async function getStatsData(user) {
     .where(eq(budgetCategories.userId, user.id))
     .orderBy(asc(budgetCategories.label))
 
+  // Current year spending (YTD - Year to Date)
   const currentSpent = await db
     .select({
       category_id: items.categoryId,
@@ -29,10 +25,15 @@ export async function getStatsData(user) {
     .from(items)
     .innerJoin(months, eq(months.id, items.monthId))
     .where(
-      and(eq(months.userId, user.id), eq(months.year, currentYear), eq(months.month, currentMonth))
+      and(
+        eq(months.userId, user.id),
+        eq(months.year, currentYear),
+        sql`${months.month} <= ${currentMonth}`
+      )
     )
     .groupBy(items.categoryId)
 
+  // Previous year spending (same period)
   const prevSpent = await db
     .select({
       category_id: items.categoryId,
@@ -40,7 +41,13 @@ export async function getStatsData(user) {
     })
     .from(items)
     .innerJoin(months, eq(months.id, items.monthId))
-    .where(and(eq(months.userId, user.id), eq(months.year, prevYear), eq(months.month, prevMonth)))
+    .where(
+      and(
+        eq(months.userId, user.id),
+        eq(months.year, prevYear),
+        sql`${months.month} <= ${currentMonth}`
+      )
+    )
     .groupBy(items.categoryId)
 
   const currentMap = new Map(currentSpent.map((row) => [row.category_id, Number(row.amount || 0)]))
