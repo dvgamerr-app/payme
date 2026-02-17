@@ -1,8 +1,5 @@
 <script>
-  import { createEventDispatcher } from 'svelte'
   import { ChevronDown } from 'lucide-svelte'
-
-  const dispatch = createEventDispatcher()
 
   /**
    * Custom Select Component
@@ -14,6 +11,7 @@
    * @prop {string} name - Form field name
    * @prop {boolean} required - Whether the field is required
    * @prop {string} className - Additional CSS classes
+   * @prop {Function} onchange - Callback function when value changes
    */
   export let label = ''
   export let options = []
@@ -23,6 +21,7 @@
   export let name = ''
   export let required = false
   export let className = ''
+  export let onchange = () => {}
 
   let isOpen = false
   let highlightedIndex = -1
@@ -51,7 +50,7 @@
     highlightedIndex = -1
 
     if (prevValue !== optionValue) {
-      dispatch('change', { value: optionValue })
+      onchange({ value: optionValue })
     }
 
     // Return focus to button

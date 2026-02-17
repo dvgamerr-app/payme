@@ -8,6 +8,9 @@
   import Card from './ui/Card.svelte'
   import FixedExpenseForm from './FixedExpenseForm.svelte'
   import DeleteButton from './ui/DeleteButton.svelte'
+  import Modal from './ui/Modal.svelte'
+  import Input from './ui/Input.svelte'
+  import Select from './ui/Select.svelte'
 
   export let expenses = []
   export let totalFixed = 0
@@ -20,8 +23,20 @@
   let frequency = 'monthly'
   let currency = 'THB'
   let currencySymbol = '฿'
+  let isMobile = false
+  let showModal = false
+  let modalMode = 'add'
 
   const flipDurationMs = 0
+
+  const checkMobile = () => {
+    isMobile = window.innerWidth <= 768
+  }
+
+  if (typeof window !== 'undefined') {
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+  }
 
   $: currencySymbol = $settings.currencySymbol || '฿'
   $: baseCurrency = $settings.baseCurrency || 'THB'
@@ -64,6 +79,7 @@
     frequency = 'monthly'
     currency = 'THB'
     isAdding = false
+    showModal = false
     await onUpdate()
   }
 
@@ -82,6 +98,7 @@
     amount = ''
     frequency = 'monthly'
     currency = 'THB'
+    showModal = false
     onUpdate()
   }
 
@@ -97,6 +114,11 @@
     amount = expense.amount.toString()
     frequency = expense.frequency || 'monthly'
     currency = expense.currency || 'THB'
+
+    if (isMobile) {
+      modalMode = 'edit'
+      showModal = true
+    }
   }
 
   function cancelEdit() {
@@ -106,11 +128,17 @@
     frequency = 'monthly'
     currency = 'THB'
     isAdding = false
+    showModal = false
   }
 
   function startAdd() {
     cancelEdit()
     isAdding = true
+
+    if (isMobile) {
+      modalMode = 'add'
+      showModal = true
+    }
   }
 
   function handleDndConsider(e) {
@@ -142,7 +170,7 @@
     </button>
   </div>
 
-  <div class="max-h-60 min-h-60 space-y-0 overflow-y-auto">
+  <div class="space-y-0 overflow-y-auto md:max-h-60 md:min-h-60">
     <div
       use:dndzone={{
         items,
@@ -160,7 +188,7 @@
           animate:flip={{ duration: flipDurationMs }}
           class="group flex items-center justify-between outline-none focus:outline-none"
         >
-          {#if editingId === expense.id}
+          {#if editingId === expense.id && !isMobile}
             <FixedExpenseForm
               mode="edit"
               bind:label
@@ -172,9 +200,11 @@
             />
           {:else}
             <button
-              on:dblclick={() => startEdit(expense)}
-              class="text-foreground hover:bg-muted flex flex-1 items-center justify-between rounded-[0.5em] py-2 text-left text-sm
-              {editingId || isAdding ? 'pr-3 pl-4' : 'px-3'}"
+              on:click={() => isMobile && startEdit(expense)}
+              on:dblclick={() => !isMobile && startEdit(expense)}
+              class="text-foreground hover:bg-muted flex flex-1 items-center justify-between rounded-[0.5em] text-left text-sm
+              {editingId || isAdding ? 'pr-3 pl-4' : 'px-3'}
+              {isMobile ? 'py-3' : 'py-2'}"
             >
               {#if !editingId && !isAdding}
                 <div
@@ -199,7 +229,7 @@
       {/each}
     </div>
 
-    {#if isAdding}
+    {#if isAdding && !isMobile}
       <FixedExpenseForm
         mode="add"
         bind:label
@@ -225,3 +255,73 @@
     </div>
   {/if}
 </Card>
+
+<Modal
+  bind:isOpen={showModal}
+  onClose={cancelEdit}
+  title={modalMode === 'add' ? 'Add Fixed Expense' : 'Edit Fixed Expense'}
+  size="sm"
+  variant="slide"
+>
+  <div class="space-y-4">
+    <div>
+      <label for="fixed-label" class="text-foreground mb-2 block text-sm font-medium">Label</label>
+      <Input id="fixed-label" placeholder="Enter label" bind:value={label} />
+    </div>
+    <div>
+      <label for="fixed-amount" class="text-foreground mb-2 block text-sm font-medium">Amount</label
+      >
+      <Input
+        id="fixed-amount"
+        type="text"
+        placeholder="Enter amount"
+        bind:value={amount}
+        formatAsNumber={true}
+      />
+    </div>
+    <div>
+      <label for="fixed-frequency" class="text-foreground mb-2 block text-sm font-medium"
+        >Frequency</label
+      >
+      <Select
+        id="fixed-frequency"
+        options={[
+          { value: 'monthly', label: 'Monthly' },
+          { value: 'yearly', label: 'Yearly' },
+        ]}
+        bind:value={frequency}
+      />
+    </div>
+    <div>
+      <label for="fixed-currency" class="text-foreground mb-2 block text-sm font-medium"
+        >Currency</label
+      >
+      <Select
+        id="fixed-currency"
+        options={[
+          { value: 'THB', label: 'THB (฿)' },
+          { value: 'USD', label: 'USD ($)' },
+          { value: 'EUR', label: 'EUR (€)' },
+          { value: 'GBP', label: 'GBP (£)' },
+          { value: 'JPY', label: 'JPY (¥)' },
+        ]}
+        bind:value={currency}
+      />
+    </div>
+    <div class="flex justify-end gap-2 pt-2">
+      <button
+        on:click={cancelEdit}
+        class="hover:bg-accent text-foreground rounded-md px-4 py-2 text-sm transition-colors"
+      >
+        Cancel
+      </button>
+      <button
+        on:click={() => (modalMode === 'add' ? handleAdd() : handleUpdate(editingId))}
+        class="bg-foreground text-background rounded-md px-4 py-2 text-sm transition-opacity hover:opacity-90"
+        disabled={!label || !amount}
+      >
+        {modalMode === 'add' ? 'Add' : 'Update'}
+      </button>
+    </div>
+  </div>
+</Modal>

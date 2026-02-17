@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher, onDestroy } from 'svelte'
+  import { onDestroy } from 'svelte'
   import { X } from 'lucide-svelte'
 
   /**
@@ -12,6 +12,7 @@
   export let onClose = () => {}
   export let size = 'md' // 'sm', 'md', 'lg', 'xl'
   export let noScroll = false // When true, content manages its own scrolling
+  export let variant = 'center' // 'center' or 'slide'
 
   const sizeClasses = {
     sm: 'max-w-md',
@@ -20,12 +21,19 @@
     xl: 'max-w-4xl',
   }
 
-  const dispatch = createEventDispatcher()
+  let isMobile = false
+  const checkMobile = () => {
+    isMobile = window.innerWidth <= 768
+  }
+
+  if (typeof window !== 'undefined') {
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+  }
 
   function handleClose() {
     isOpen = false
     onClose()
-    dispatch('close')
   }
 
   function handleBackdropClick(e) {
@@ -58,20 +66,30 @@
 
 {#if isOpen}
   <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-  <div class="fixed inset-0 z-50 flex items-center justify-center" on:keydown={handleKeydown}>
+  <div
+    class="fixed inset-0 z-50 flex {isMobile || variant === 'slide'
+      ? 'items-end md:items-center md:justify-end'
+      : 'items-center justify-center'}"
+    on:keydown={handleKeydown}
+  >
     <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
     <div
       class="bg-charcoal-900/50 absolute inset-0 backdrop-blur-sm"
       on:click={handleBackdropClick}
     ></div>
     <div
-      class="bg-card animate-fadeIn relative mx-4 w-full {sizeClasses[
-        size
-      ]} overflow-hidden rounded-2xl shadow-md"
-      style="height: 600px; max-height: 90vh;"
+      class="bg-card relative {isMobile || variant === 'slide'
+        ? 'animate-slideIn h-full w-full md:h-full md:w-[480px] md:max-w-[90vw]'
+        : 'animate-fadeIn mx-4 w-full rounded-2xl ' +
+          sizeClasses[size]} overflow-hidden shadow-md {isMobile || variant === 'slide'
+        ? 'rounded-t-2xl md:rounded-l-2xl md:rounded-r-none'
+        : ''}"
+      style={isMobile || variant === 'slide' ? '' : 'height: 600px; max-height: 90vh;'}
     >
       <div class="flex h-full flex-col">
-        <div class="mb-4 flex flex-shrink-0 items-center justify-between px-6 pt-6">
+        <div
+          class="border-border mb-0 flex flex-shrink-0 items-center justify-between border-b px-4 py-4 md:px-6"
+        >
           {#if title}
             <h2 class="text-foreground text-lg font-semibold">
               {title}
@@ -85,7 +103,7 @@
             <X size={20} />
           </button>
         </div>
-        <div class="flex-1 px-6 pb-6 {noScroll ? 'overflow-hidden' : 'overflow-y-auto'}">
+        <div class="flex-1 px-4 py-4 md:px-6 {noScroll ? 'overflow-hidden' : 'overflow-y-auto'}">
           <slot />
         </div>
       </div>
@@ -105,7 +123,20 @@
     }
   }
 
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
   .animate-fadeIn {
     animation: fadeIn 0.2s ease-out;
+  }
+
+  .animate-slideIn {
+    animation: slideIn 0.3s ease-out;
   }
 </style>

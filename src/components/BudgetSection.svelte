@@ -21,6 +21,17 @@
   let editingBudgetId = null
   let label = ''
   let amount = ''
+  let isMobile = false
+  let showBudgetModal = false
+
+  const checkMobile = () => {
+    isMobile = window.innerWidth <= 768
+  }
+
+  if (typeof window !== 'undefined') {
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+  }
 
   $: currencySymbol = $settings.currencySymbol || '฿'
 
@@ -28,8 +39,12 @@
   $: if (!isManaging) {
     isAddingCategory = false
     editingCategoryId = null
-    editingBudgetId = null
     label = ''
+    amount = ''
+  }
+
+  $: if (!showBudgetModal) {
+    editingBudgetId = null
     amount = ''
   }
 
@@ -65,6 +80,7 @@
     await api.budgets.update(monthId, budgetId, parseFloat(amount))
     editingBudgetId = null
     amount = ''
+    showBudgetModal = false
     await onUpdate()
   }
 
@@ -77,6 +93,10 @@
   function startEditBudget(budget) {
     editingBudgetId = budget.id
     amount = budget.allocated_amount.toString()
+
+    if (isMobile) {
+      showBudgetModal = true
+    }
   }
 
   function cancelEdit() {
@@ -85,6 +105,7 @@
     label = ''
     amount = ''
     isAddingCategory = false
+    showBudgetModal = false
   }
 </script>
 
@@ -102,7 +123,7 @@
   <div class="space-y-4">
     {#each budgets as budget (budget.id)}
       <div>
-        {#if editingBudgetId === budget.id && !isReadOnly}
+        {#if editingBudgetId === budget.id && !isReadOnly && !isMobile}
           <div class="flex items-end gap-2">
             <div class="flex-1">
               <div class="mb-1 text-sm">{budget.category_label}</div>
@@ -138,7 +159,8 @@
                 </span>
                 {#if !isReadOnly}
                   <button
-                    on:dblclick={() => startEditBudget(budget)}
+                    on:click={() => isMobile && startEditBudget(budget)}
+                    on:dblclick={() => !isMobile && startEditBudget(budget)}
                     class="hover:bg-accent rounded p-1"
                   >
                     <Pen size={12} />
@@ -163,7 +185,67 @@
   </div>
 </Card>
 
-<Modal bind:isOpen={isManaging} onClose={closeModal} title="Manage Categories">
+<Modal
+  bind:isOpen={showBudgetModal}
+  onClose={cancelEdit}
+  title="Edit Budget"
+  size="sm"
+  variant="slide"
+>
+  {#if editingBudgetId}
+    {@const budget = budgets.find((b) => b.id === editingBudgetId)}
+    {#if budget}
+      <div class="space-y-4">
+        <div>
+          <label for="budget-category" class="text-foreground mb-2 block text-sm font-medium"
+            >Category</label
+          >
+          <div
+            id="budget-category"
+            class="text-foreground border-border bg-muted rounded-md border px-3 py-2 text-sm"
+          >
+            {budget.category_label}
+          </div>
+        </div>
+        <div>
+          <label for="budget-amount" class="text-foreground mb-2 block text-sm font-medium"
+            >Budget Amount</label
+          >
+          <div class="flex items-center gap-2">
+            <span class="text-muted-foreground text-sm">{currencySymbol}</span>
+            <Input
+              id="budget-amount"
+              type="text"
+              placeholder="Enter budget amount"
+              bind:value={amount}
+              formatAsNumber={true}
+            />
+          </div>
+        </div>
+        <div class="text-muted-foreground text-xs">
+          Current spent: {formatCurrency(budget.spent_amount, currencySymbol)}
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button
+            on:click={cancelEdit}
+            class="hover:bg-accent text-foreground rounded-md px-4 py-2 text-sm transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            on:click={() => handleUpdateBudget(editingBudgetId)}
+            class="bg-foreground text-background rounded-md px-4 py-2 text-sm transition-opacity hover:opacity-90"
+            disabled={!amount}
+          >
+            Update
+          </button>
+        </div>
+      </div>
+    {/if}
+  {/if}
+</Modal>
+
+<Modal bind:isOpen={isManaging} onClose={closeModal} title="Manage Categories" variant="slide">
   <p class="text-muted-foreground mb-4 text-sm">
     Categories define your budget types. Default amounts apply to new months.
   </p>
@@ -196,7 +278,8 @@
                 {formatCurrency(cat.default_amount, currencySymbol)} default
               </span>
               <button
-                on:dblclick={() => startEditCategory(cat)}
+                on:click={() => isMobile && startEditCategory(cat)}
+                on:dblclick={() => !isMobile && startEditCategory(cat)}
                 class="p-1 opacity-70 hover:opacity-100"
               >
                 <Pen size={14} />

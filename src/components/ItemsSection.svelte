@@ -30,6 +30,18 @@
   let selectedItemToMove = null
   let availableMonths = []
   let targetMonthId = ''
+  let isMobile = false
+  let showItemModal = false
+  let modalMode = 'add'
+
+  const checkMobile = () => {
+    isMobile = window.innerWidth <= 768
+  }
+
+  if (typeof window !== 'undefined') {
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+  }
 
   $: currencySymbol = $settings.currencySymbol || '฿'
   $: categoryOptions = categories.map((c) => ({ value: c.id, label: c.label }))
@@ -69,6 +81,11 @@
     amount = item.amount.toString()
     categoryId = item.category_id ? item.category_id.toString() : ''
     spentOn = formatDateForInput(item.spent_on)
+
+    if (isMobile) {
+      modalMode = 'edit'
+      showItemModal = true
+    }
   }
 
   function resetForm() {
@@ -78,6 +95,7 @@
     categoryId = ''
     spentOn = new Date().toISOString().split('T')[0]
     isAdding = false
+    showItemModal = false
   }
 
   function formatDate(dateString) {
@@ -111,6 +129,11 @@
   function startAdd() {
     resetForm()
     isAdding = true
+
+    if (isMobile) {
+      modalMode = 'add'
+      showItemModal = true
+    }
   }
 
   const handleKeyDown = (event) => {
@@ -141,8 +164,7 @@
 
     // โหลด months ทั้งหมด
     try {
-      const response = await fetch('/api/months')
-      const monthsData = await response.json()
+      const monthsData = await api.months.list()
       availableMonths = monthsData.map((m) => ({
         value: m.id,
         label: `${m.month}/${m.year}`,
@@ -158,26 +180,20 @@
     if (!selectedItemToMove || !targetMonthId) return
 
     try {
-      await fetch(`/api/months/${monthId}/items/${selectedItemToMove.id}/move`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ target_month_id: parseInt(targetMonthId) }),
-      })
+      await api.items.move(monthId, selectedItemToMove.id, parseInt(targetMonthId))
       showMoveModal = false
       selectedItemToMove = null
       await onUpdate()
     } catch (error) {
       console.error('Failed to move item:', error)
-      alert('Failed to move transaction')
     }
   }
 
-  $: if (isAdding && descriptionInput) {
+  $: if (isAdding && descriptionInput && !isMobile) {
     descriptionInput.focus()
   }
 
-  $: if (editingId && descriptionInput) {
+  $: if (editingId && descriptionInput && !isMobile) {
     descriptionInput.focus()
   }
 </script>
@@ -196,7 +212,81 @@
     {/if}
   </div>
 
-  <table class="w-full text-sm">
+  <!-- Mobile Card View -->
+  <div class="space-y-3 md:hidden">
+    {#each items as item (item.id)}
+      <div
+        role="button"
+        tabindex="0"
+        class="border-border hover:bg-accent/30 rounded-lg border p-4 transition-colors"
+        on:click={() => !isReadOnly && !isAdding && !editingId && startEdit(item)}
+        on:keydown={(e) =>
+          e.key === 'Enter' && !isReadOnly && !isAdding && !editingId && startEdit(item)}
+      >
+        <div class="mb-3 flex items-start justify-between gap-3">
+          <div class="flex-1">
+            <div class="text-foreground mb-1.5 text-base font-medium">{item.description}</div>
+            <div class="text-muted-foreground text-sm">{formatDate(item.spent_on)}</div>
+          </div>
+          <div class="text-foreground text-right text-base font-semibold">
+            {formatCurrency(item.amount, currencySymbol)}
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            {#if item.category_label}
+              <span
+                class="bg-accent text-accent-foreground inline-block rounded-full px-2.5 py-1 text-sm"
+              >
+                {item.category_label}
+              </span>
+            {:else}
+              <span class="text-muted-foreground text-sm italic">No category</span>
+            {/if}
+          </div>
+          {#if !isReadOnly}
+            <div class="relative">
+              <button
+                on:click|stopPropagation={() => toggleDropdown(item.id)}
+                class="hover:bg-accent rounded p-2"
+              >
+                <EllipsisVertical size={16} />
+              </button>
+              {#if openDropdownId === item.id}
+                <div
+                  class="bg-background border-border absolute right-0 z-10 mt-1 w-40 rounded-md border shadow-lg"
+                >
+                  <button
+                    on:click={() => openMoveModal(item)}
+                    class="hover:bg-accent text-foreground block w-full px-4 py-2 text-left text-xs"
+                  >
+                    Move
+                  </button>
+                  <button
+                    on:click={() => {
+                      if (confirm('Are you sure you want to delete this transaction?')) {
+                        handleDelete(item.id)
+                      }
+                      closeDropdown()
+                    }}
+                    class="hover:bg-destructive/10 text-destructive block w-full px-4 py-2 text-left text-xs"
+                  >
+                    Delete
+                  </button>
+                </div>
+              {/if}
+            </div>
+          {/if}
+        </div>
+      </div>
+    {/each}
+    {#if items.length === 0}
+      <div class="text-muted-foreground py-8 text-center text-sm">No spending items yet</div>
+    {/if}
+  </div>
+
+  <!-- Desktop Table View -->
+  <table class="hidden w-full text-sm md:table">
     <thead>
       <tr class="border-border border-b">
         <th class="text-muted-foreground w-22 py-3 text-left text-xs font-medium">Date</th>
@@ -209,7 +299,7 @@
       </tr>
     </thead>
     <tbody>
-      {#if isAdding}
+      {#if isAdding && !isMobile}
         <tr class="hover:bg-accent/50 transition-colors">
           <td class="py-0.5">
             <DatePicker bind:value={spentOn} className="text-xs" on:keydown={handleKeyDown} />
@@ -253,9 +343,10 @@
           class="hover:bg-accent/50 transition-colors last:border-0 {editingId !== item.id
             ? 'border-border cursor-pointer border-b'
             : ''}"
-          on:dblclick={() => !isReadOnly && !isAdding && !editingId && startEdit(item)}
+          on:click={() => isMobile && !isReadOnly && !isAdding && !editingId && startEdit(item)}
+          on:dblclick={() => !isMobile && !isReadOnly && !isAdding && !editingId && startEdit(item)}
         >
-          {#if editingId === item.id}
+          {#if editingId === item.id && !isMobile}
             <td class="py-1">
               <DatePicker bind:value={spentOn} className="text-xs" on:keydown={handleKeyDown} />
             </td>
@@ -360,6 +451,66 @@
     </tbody>
   </table>
 </Card>
+
+<Modal
+  bind:isOpen={showItemModal}
+  onClose={resetForm}
+  title={modalMode === 'add' ? 'Add Transaction' : 'Edit Transaction'}
+  size="sm"
+  variant="slide"
+>
+  <div class="space-y-4">
+    <div>
+      <label for="item-date" class="text-foreground mb-2 block text-sm font-medium">Date</label>
+      <DatePicker id="item-date" bind:value={spentOn} />
+    </div>
+    <div>
+      <label for="item-description" class="text-foreground mb-2 block text-sm font-medium"
+        >Description</label
+      >
+      <Input id="item-description" placeholder="Enter description" bind:value={description} />
+    </div>
+    <div>
+      <label for="item-category" class="text-foreground mb-2 block text-sm font-medium"
+        >Category</label
+      >
+      <Select
+        id="item-category"
+        options={categoryOptions}
+        bind:value={categoryId}
+        placeholder="Optional"
+      />
+    </div>
+    <div>
+      <label for="item-amount" class="text-foreground mb-2 block text-sm font-medium">Amount</label>
+      <div class="flex items-center gap-2">
+        <span class="text-muted-foreground text-sm">{currencySymbol}</span>
+        <Input
+          id="item-amount"
+          type="text"
+          placeholder="Enter amount"
+          bind:value={amount}
+          formatAsNumber={true}
+        />
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 pt-2">
+      <button
+        on:click={resetForm}
+        class="hover:bg-accent text-foreground rounded-md px-4 py-2 text-sm transition-colors"
+      >
+        Cancel
+      </button>
+      <button
+        on:click={() => (modalMode === 'add' ? handleAdd() : handleUpdate(editingId))}
+        class="bg-foreground text-background rounded-md px-4 py-2 text-sm transition-opacity hover:opacity-90"
+        disabled={!description || !amount}
+      >
+        {modalMode === 'add' ? 'Add' : 'Update'}
+      </button>
+    </div>
+  </div>
+</Modal>
 
 <Modal bind:isOpen={showMoveModal} title="Move Transaction" size="sm">
   <div class="space-y-4">

@@ -9,6 +9,7 @@
   import Input from './ui/Input.svelte'
   import SaveButtons from './ui/SaveButtons.svelte'
   import DeleteButton from './ui/DeleteButton.svelte'
+  import Modal from './ui/Modal.svelte'
 
   export let monthId
   export let entries = []
@@ -21,11 +22,11 @@
   $: currencySymbol = $settings.currencySymbol || '฿'
   $: items = entries.map((entry) => ({ id: entry.id, data: entry }))
 
-  $: if (editingId && amountInput) {
+  $: if (editingId && amountInput && !isMobile) {
     amountInput.focus()
   }
 
-  $: if (isAdding && labelInput) {
+  $: if (isAdding && labelInput && !isMobile) {
     labelInput.focus()
   }
 
@@ -35,6 +36,18 @@
   let amount = ''
   let amountInput = null
   let labelInput = null
+  let isMobile = false
+  let showModal = false
+  let modalMode = 'add' // 'add' or 'edit'
+
+  const checkMobile = () => {
+    isMobile = window.innerWidth <= 768
+  }
+
+  if (typeof window !== 'undefined') {
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+  }
 
   async function handleAdd() {
     if (!label || !amount || !monthId) {
@@ -45,6 +58,7 @@
     label = ''
     amount = ''
     isAdding = false
+    showModal = false
     await onUpdate()
   }
 
@@ -57,6 +71,7 @@
     editingId = null
     label = ''
     amount = ''
+    showModal = false
     await onUpdate()
   }
 
@@ -74,6 +89,11 @@
     editingId = entry.id
     label = entry.label
     amount = entry.amount.toString()
+
+    if (isMobile) {
+      modalMode = 'edit'
+      showModal = true
+    }
   }
 
   function cancelEdit() {
@@ -81,11 +101,17 @@
     label = ''
     amount = ''
     isAdding = false
+    showModal = false
   }
 
   function startAdd() {
     cancelEdit()
     isAdding = true
+
+    if (isMobile) {
+      modalMode = 'add'
+      showModal = true
+    }
   }
 
   async function copyFromPrevious() {
@@ -95,7 +121,6 @@
       await onUpdate()
     } catch (error) {
       console.error('Failed to copy income:', error)
-      alert('Failed to copy income from previous month')
     }
   }
 
@@ -139,7 +164,7 @@
     {/if}
   </div>
 
-  <div class="max-h-60 min-h-60 space-y-0 overflow-y-auto">
+  <div class="space-y-0 overflow-y-auto md:max-h-60 md:min-h-60">
     <div
       use:dndzone={{
         items,
@@ -157,7 +182,7 @@
           animate:flip={{ duration: flipDurationMs }}
           class="group flex items-center justify-between outline-none focus:outline-none"
         >
-          {#if editingId === entry.id}
+          {#if editingId === entry.id && !isMobile}
             <div class="flex flex-1 items-end gap-2 pl-4">
               <div class="flex-1">
                 <Input placeholder="Label" bind:value={label} on:keydown={handleKeyDown} />
@@ -181,9 +206,11 @@
             </div>
           {:else}
             <button
-              on:dblclick={() => startEdit(entry)}
-              class="text-foreground hover:bg-muted flex flex-1 items-center justify-between rounded-[0.5em] py-2 text-left text-sm
-              {editingId || isAdding ? 'pr-3 pl-4' : 'px-3'}"
+              on:click={() => isMobile && !isReadOnly && startEdit(entry)}
+              on:dblclick={() => !isMobile && !isReadOnly && startEdit(entry)}
+              class="text-foreground hover:bg-muted flex flex-1 items-center justify-between rounded-[0.5em] text-left text-sm
+              {editingId || isAdding ? 'pr-3 pl-4' : 'px-3'}
+              {isMobile ? 'py-3' : 'py-2'}"
               disabled={isReadOnly}
             >
               {#if !editingId && !isAdding && !isReadOnly}
@@ -208,7 +235,7 @@
       {/each}
     </div>
 
-    {#if isAdding}
+    {#if isAdding && !isMobile}
       <div class="flex items-end gap-2 pl-4">
         <div class="flex-1">
           <Input
@@ -263,3 +290,54 @@
     </div>
   {/if}
 </Card>
+
+<Modal
+  bind:isOpen={showModal}
+  onClose={cancelEdit}
+  title={modalMode === 'add' ? 'Add Income' : 'Edit Income'}
+  size="sm"
+  variant="slide"
+>
+  <div class="space-y-4">
+    <div>
+      <label for="income-label" class="text-foreground mb-2 block text-sm font-medium">Label</label>
+      <Input
+        id="income-label"
+        placeholder="Enter label"
+        bind:value={label}
+        on:keydown={handleKeyDown}
+      />
+    </div>
+    <div>
+      <label for="income-amount" class="text-foreground mb-2 block text-sm font-medium"
+        >Amount</label
+      >
+      <div class="flex items-center gap-2">
+        <span class="text-muted-foreground text-sm">{currencySymbol}</span>
+        <Input
+          id="income-amount"
+          type="text"
+          placeholder="Enter amount"
+          bind:value={amount}
+          formatAsNumber={true}
+          on:keydown={handleKeyDown}
+        />
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 pt-2">
+      <button
+        on:click={cancelEdit}
+        class="hover:bg-accent text-foreground rounded-md px-4 py-2 text-sm transition-colors"
+      >
+        Cancel
+      </button>
+      <button
+        on:click={() => (modalMode === 'add' ? handleAdd() : handleUpdate(editingId))}
+        class="bg-foreground text-background rounded-md px-4 py-2 text-sm transition-opacity hover:opacity-90"
+        disabled={!label || !amount}
+      >
+        {modalMode === 'add' ? 'Add' : 'Update'}
+      </button>
+    </div>
+  </div>
+</Modal>

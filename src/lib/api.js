@@ -175,6 +175,7 @@ export const api = {
   },
 
   months: {
+    list: () => request('/months'),
     current: () => request('/months/current'),
     get: (id) => request(`/months/${id}`),
     create: (year, month) => request(`/months?year=${year}&month=${month}`),
@@ -291,6 +292,11 @@ export const api = {
       }),
     delete: (monthId, itemId) =>
       request(`/months/${monthId}/items/${itemId}`, { method: 'DELETE' }),
+    move: (monthId, itemId, targetMonthId) =>
+      request(`/months/${monthId}/items/${itemId}/move`, {
+        method: 'PUT',
+        body: JSON.stringify({ target_month_id: targetMonthId }),
+      }),
   },
 
   stats: {

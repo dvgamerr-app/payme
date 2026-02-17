@@ -83,12 +83,14 @@
 </script>
 
 <Modal {isOpen} {onClose} title="Settings" size="xl" noScroll>
-  <div class="flex h-full gap-4">
-    <!-- Sidebar (fixed, no scroll) -->
-    <div class="border-border flex w-40 shrink-0 flex-col gap-1 border-r pr-3">
+  <div class="flex h-full flex-col gap-4 md:flex-row">
+    <!-- Tabs - Horizontal on mobile, Sidebar on desktop -->
+    <div
+      class="border-border flex shrink-0 gap-1 overflow-x-auto border-b pb-2 md:w-40 md:flex-col md:border-r md:border-b-0 md:pr-3 md:pb-0"
+    >
       {#each tabs as tab}
         <button
-          class="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors {activeTab ===
+          class="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors md:px-2.5 {activeTab ===
           tab.id
             ? 'bg-accent text-foreground font-medium'
             : 'text-muted-foreground hover:bg-secondary/50'}"
@@ -101,7 +103,7 @@
     </div>
 
     <!-- Content (scrollable) -->
-    <div class="flex-1 overflow-y-auto">
+    <div class="flex-1 overflow-y-auto px-1 md:px-0">
       {#if activeTab === 'general'}
         <div class="flex flex-col gap-6">
           <p class="text-muted-foreground -mt-2 text-[0.9375rem]">
@@ -110,7 +112,7 @@
 
           <div class="flex flex-col gap-4">
             <h3 class="m-0 text-[0.9375rem] font-semibold">Currency</h3>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {#each currencies as currency}
                 <button
                   class="flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors {selectedCurrency ===
@@ -135,7 +137,7 @@
 
           <div class="flex flex-col gap-4">
             <h3 class="m-0 text-[0.9375rem] font-semibold">วันเงินเดือนออก (Payday)</h3>
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
               {#each paydayOptions as option}
                 <button
                   class="flex flex-col items-center gap-1 rounded-lg border px-3 py-3 transition-colors {selectedPayday ===

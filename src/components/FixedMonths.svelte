@@ -20,13 +20,23 @@
   let name = ''
   let amount = ''
   let amountInput = null
+  let isMobile = false
 
   const flipDurationMs = 0
+
+  const checkMobile = () => {
+    isMobile = window.innerWidth <= 768
+  }
+
+  if (typeof window !== 'undefined') {
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+  }
 
   $: currencySymbol = $settings.currencySymbol || '฿'
   $: items = fixedExpenses.map((exp) => ({ id: exp.id, data: exp }))
 
-  $: if (editingId && amountInput) {
+  $: if (editingId && amountInput && !isMobile) {
     amountInput.focus()
   }
 
@@ -119,7 +129,7 @@
     </button>
   </div>
 
-  <div class="max-h-60 min-h-60 space-y-0 overflow-y-auto">
+  <div class="space-y-0 overflow-y-auto md:max-h-60 md:min-h-60">
     <div
       use:dndzone={{
         items,
@@ -161,9 +171,11 @@
             </div>
           {:else}
             <button
-              on:dblclick={() => startEdit(expense)}
-              class="text-foreground hover:bg-muted flex flex-1 items-center justify-between rounded-[0.5em] py-2 text-left text-sm
-              {editingId || isAdding ? 'pr-3 pl-4' : 'px-3'}"
+              on:click={() => isMobile && startEdit(expense)}
+              on:dblclick={() => !isMobile && startEdit(expense)}
+              class="text-foreground hover:bg-muted flex flex-1 items-center justify-between rounded-[0.5em] text-left text-sm
+              {editingId || isAdding ? 'pr-3 pl-4' : 'px-3'}
+              {isMobile ? 'py-3' : 'py-2'}"
             >
               {#if !editingId && !isAdding}
                 <div

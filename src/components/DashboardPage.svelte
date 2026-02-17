@@ -134,14 +134,14 @@
 
   async function closeMonth() {
     if (!selectedMonthId) {
-      alert('No month selected')
+      console.error('No month selected')
       return
     }
     try {
       await api.months.close(selectedMonthId)
       await loadData()
     } catch (err) {
-      alert(err.message || 'Failed to close month')
+      console.error('Failed to close month:', err)
     }
   }
 </script>
@@ -163,6 +163,13 @@
           remaining={summary.remaining}
         />
 
+        <ItemsSection
+          monthId={selectedMonthId}
+          items={summary.items}
+          {categories}
+          isReadOnly={summary.month.is_closed}
+          onUpdate={refresh}
+        />
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <IncomeSection
             monthId={selectedMonthId}
@@ -193,14 +200,6 @@
           onUpdate={refresh}
         /> -->
         </div>
-
-        <ItemsSection
-          monthId={selectedMonthId}
-          items={summary.items}
-          {categories}
-          isReadOnly={summary.month.is_closed}
-          onUpdate={refresh}
-        />
       {/if}
     </div>
   {/key}

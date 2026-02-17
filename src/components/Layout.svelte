@@ -39,9 +39,9 @@
 </script>
 
 <div class="min-h-screen">
-  <header class="bg-background/95 sticky top-0 z-40">
-    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-      <div class="flex items-center gap-3">
+  <header class="bg-background/95 sticky top-0 z-40 backdrop-blur-sm">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6 md:py-6">
+      <div class="flex items-center gap-2 md:gap-3">
         {#if showBack}
           <a
             href="/"
@@ -52,8 +52,8 @@
           </a>
         {/if}
         <div>
-          <h1 class="text-2xl font-bold">Payme</h1>
-          <p class="text-muted-foreground text-sm">
+          <h1 class="text-xl font-bold md:text-2xl">Payme</h1>
+          <p class="text-muted-foreground hidden text-sm sm:block">
             Track your family's money.{#if user}
               Hi, <span
                 class="bg-primary text-primary-foreground rounded px-1 py-0.5 text-sm font-medium uppercase"
@@ -103,7 +103,7 @@
       </div>
     </div>
   </header>
-  <main class="mx-auto max-w-6xl px-4 py-8">
+  <main class="mx-auto max-w-6xl px-4 py-6 md:px-6 md:py-8">
     <slot />
   </main>
 </div>

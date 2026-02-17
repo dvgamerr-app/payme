@@ -115,7 +115,7 @@
   $: nextDisabled = !canAccessNextMonth(payday)
 </script>
 
-<div class="mb-6 flex items-center justify-between">
+<div class="mb-4 flex items-center justify-between md:mb-6">
   <div class="flex items-center gap-2">
     <button
       on:click={goPrev}
@@ -123,7 +123,7 @@
     >
       <ChevronLeft size={18} />
     </button>
-    <div class="text-lg font-medium">
+    <div class="text-base font-medium md:text-lg">
       {MONTH_NAMES[currentMonth - 1]}
       {currentYear}
     </div>
@@ -136,7 +136,7 @@
     </button>
   </div>
 
-  <div class="text-muted-foreground flex items-center gap-2 text-sm">
+  <div class="text-muted-foreground hidden items-center gap-2 text-sm sm:flex">
     Savings goal
     <span class="text-accent-gold font-medium">฿10,000</span>
   </div>

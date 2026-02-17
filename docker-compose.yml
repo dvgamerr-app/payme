@@ -3,7 +3,7 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "3001:3001"
+      - '3001:3001'
     volumes:
       - payme_data:/data
     environment:
@@ -15,7 +15,7 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       - POSTGRES_USER=payme_user
       - POSTGRES_PASSWORD=securepassword

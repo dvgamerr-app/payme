@@ -12,6 +12,16 @@
   let savings = 0
   let isEditing = false
   let editValue = ''
+  let isMobile = false
+
+  const checkMobile = () => {
+    isMobile = window.innerWidth <= 768
+  }
+
+  if (typeof window !== 'undefined') {
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+  }
 
   $: currencySymbol = $settings.currencySymbol || '฿'
 
@@ -74,7 +84,8 @@
         {formatCurrency(savings, currencySymbol)}
       </span>
       <button
-        on:dblclick={startEdit}
+        on:click={() => isMobile && startEdit()}
+        on:dblclick={() => !isMobile && startEdit()}
         class="hover:bg-sand-200 dark:hover:bg-charcoal-700 rounded p-0.5 transition-colors"
       >
         <Pencil size={12} class="text-charcoal-400" />
