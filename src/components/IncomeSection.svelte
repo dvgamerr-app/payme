@@ -180,7 +180,7 @@
         {@const entry = item.data}
         <div
           animate:flip={{ duration: flipDurationMs }}
-          class="group flex items-center justify-between outline-none focus:outline-none"
+          class="group hover:bg-muted flex items-center justify-between outline-none focus:outline-none"
         >
           {#if editingId === entry.id && !isMobile}
             <div class="flex flex-1 items-end gap-2 pl-4">
@@ -208,7 +208,7 @@
             <button
               on:click={() => isMobile && !isReadOnly && startEdit(entry)}
               on:dblclick={() => !isMobile && !isReadOnly && startEdit(entry)}
-              class="text-foreground hover:bg-muted flex flex-1 items-center justify-between text-left text-sm
+              class="text-foreground flex flex-1 items-center justify-between text-left text-sm
               {editingId || isAdding ? 'pr-3 pl-4' : 'px-3'}
               {isMobile ? 'py-3' : 'py-2'}"
               disabled={isReadOnly}

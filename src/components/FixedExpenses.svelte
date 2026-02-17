@@ -186,7 +186,7 @@
         {@const expense = item.data}
         <div
           animate:flip={{ duration: flipDurationMs }}
-          class="group flex items-center justify-between outline-none focus:outline-none"
+          class="group hover:bg-muted flex items-center justify-between outline-none focus:outline-none"
         >
           {#if editingId === expense.id && !isMobile}
             <FixedExpenseForm
@@ -202,7 +202,7 @@
             <button
               on:click={() => isMobile && startEdit(expense)}
               on:dblclick={() => !isMobile && startEdit(expense)}
-              class="text-foreground hover:bg-muted flex flex-1 items-center justify-between text-left text-sm
+              class="text-foreground flex flex-1 items-center justify-between text-left text-sm
               {editingId || isAdding ? 'pr-3 pl-4' : 'px-3'}
               {isMobile ? 'py-3' : 'py-2'}"
             >
