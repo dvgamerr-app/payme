@@ -4,5 +4,7 @@
     "paths": {
       "@/*": ["src/*"]
     }
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", ".git", "drizzle", "public", ".vscode", ".github"]
 }

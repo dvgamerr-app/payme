@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import { eq } from 'drizzle-orm'
 import logger from './logger.js'
-import { db, schema } from './db.js'
+import { db, schema, dbDialect } from './db.js'
 
 const { users, budgetCategories, sessions } = schema
 
@@ -81,12 +81,12 @@ export const createRefreshToken = async (userId) => {
   const signature = generateSignature(data)
   const token = Buffer.from(`${data}:${signature}`).toString('base64url')
 
-  // Store in database
+  // Store in database - format date based on dialect
   await db.insert(sessions).values({
     id: tokenId,
     userId,
     token: tokenId, // Store the tokenId for lookup
-    expiresAt: expiresAt.toISOString(),
+    expiresAt: dbDialect === 'postgres' ? expiresAt : expiresAt.toISOString(),
   })
 
   return { token, expiresIn: REFRESH_TOKEN_DURATION }

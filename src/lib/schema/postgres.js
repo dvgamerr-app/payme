@@ -40,7 +40,32 @@ export const fixedExpenses = pgTable('fixed_expenses', {
   label: text('label').notNull(),
   amount: doublePrecision('amount').notNull(),
   frequency: text('frequency').notNull().default('monthly'), // 'monthly' or 'yearly'
+  currency: text('currency').notNull().default('THB'),
+  exchangeRate: doublePrecision('exchange_rate').notNull().default(1),
+  displayOrder: integer('display_order').notNull().default(0),
 })
+
+export const fixedMonths = pgTable(
+  'fixed_months',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    monthId: integer('month_id')
+      .notNull()
+      .references(() => months.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    amount: doublePrecision('amount').notNull(),
+    displayOrder: integer('display_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    byUserMonth: index('idx_fixed_months_user_month').on(table.userId, table.monthId),
+    byMonth: index('idx_fixed_months_month').on(table.monthId),
+  })
+)
 
 export const userSettings = pgTable('user_settings', {
   id: serial('id').primaryKey(),
@@ -50,6 +75,7 @@ export const userSettings = pgTable('user_settings', {
     .unique(),
   baseCurrency: text('base_currency').notNull().default('THB'),
   currencySymbol: text('currency_symbol').notNull().default('฿'),
+  payday: text('payday').notNull().default('end'),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
@@ -93,6 +119,7 @@ export const incomeEntries = pgTable(
       .references(() => months.id, { onDelete: 'cascade' }),
     label: text('label').notNull(),
     amount: doublePrecision('amount').notNull(),
+    displayOrder: integer('display_order').notNull().default(0),
   },
   (table) => ({
     byMonth: index('idx_income_month').on(table.monthId),

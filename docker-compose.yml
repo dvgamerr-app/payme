@@ -4,12 +4,13 @@ services:
     restart: unless-stopped
     ports:
       - '3001:3001'
-    volumes:
-      - payme_data:/data
     environment:
-      - DATABASE_URL=sqlite:/data/payme.db?mode=rwc
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/payme
+      - DB_DIALECT=postgres
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
       - PORT=3001
+    depends_on:
+      - postgres
 
   postgres:
     image: postgres:17-alpine
@@ -17,12 +18,11 @@ services:
     ports:
       - '5432:5432'
     environment:
-      - POSTGRES_USER=payme_user
-      - POSTGRES_PASSWORD=securepassword
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=payme
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  payme_data:
   postgres_data:

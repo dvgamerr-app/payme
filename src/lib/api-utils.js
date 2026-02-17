@@ -16,6 +16,71 @@ export const jsonError = (message, status = 500) => {
   })
 }
 
+// Map database errors to user-friendly messages
+const mapDatabaseError = (error) => {
+  // PostgreSQL error codes
+  if (error?.code === '23505' || error?.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+    return { message: 'This record already exists', status: 409 }
+  }
+  if (error?.code === '23503') {
+    return { message: 'Cannot delete: related records exist', status: 409 }
+  }
+  if (error?.code === '23502') {
+    return { message: 'Required field is missing', status: 400 }
+  }
+
+  // SQLite errors
+  if (error?.message?.includes('UNIQUE constraint failed')) {
+    return { message: 'This record already exists', status: 409 }
+  }
+  if (error?.message?.includes('FOREIGN KEY constraint failed')) {
+    return { message: 'Cannot delete: related records exist', status: 409 }
+  }
+  if (error?.message?.includes('NOT NULL constraint failed')) {
+    return { message: 'Required field is missing', status: 400 }
+  }
+
+  // Drizzle/Query errors - hide SQL details
+  if (
+    error?.message?.includes('Failed query:') ||
+    error?.message?.includes('insert into') ||
+    error?.message?.includes('select')
+  ) {
+    return { message: 'Database operation failed', status: 500 }
+  }
+
+  return null
+}
+
+// Sanitize error for client response - NEVER expose sensitive data
+const sanitizeError = (error) => {
+  const errorMessage = typeof error?.message === 'string' ? error.message : ''
+
+  // Known safe errors
+  if (errorMessage === 'Unauthorized') {
+    return { message: 'Unauthorized', status: 401 }
+  }
+  if (errorMessage.startsWith('Missing required fields')) {
+    return { message: errorMessage, status: 400 }
+  }
+  if (errorMessage.includes('not found')) {
+    return { message: errorMessage, status: 404 }
+  }
+  if (errorMessage.includes('already exists')) {
+    return { message: errorMessage, status: 409 }
+  }
+  if (errorMessage.startsWith('Invalid ')) {
+    return { message: errorMessage, status: 400 }
+  }
+
+  // Check for database errors
+  const dbError = mapDatabaseError(error)
+  if (dbError) return dbError
+
+  // Default: hide all details, return generic message
+  return { message: 'An error occurred. Please try again.', status: 500 }
+}
+
 export const validateRequired = (body, requiredFields) => {
   const missing = []
 
@@ -51,31 +116,32 @@ export const handleApiRequest = async (handler) => {
   try {
     return await handler()
   } catch (error) {
-    logger.error({ err: error }, 'API error')
+    const errorMessage = typeof error?.message === 'string' ? error.message : 'Unknown error'
+    const stack = typeof error?.stack === 'string' ? error.stack : undefined
 
-    // Handle specific error types
-    if (error.message === 'Unauthorized') {
-      return jsonError('Unauthorized', 401)
-    }
+    // Log full error details on server (for debugging)
+    logger.error(
+      {
+        message: errorMessage,
+        code: error?.code,
+        name: error?.name,
+        // Never log stack in production, but useful for dev
+        ...(process.env.NODE_ENV === 'development' && stack ? { stack } : {}),
+      },
+      'API error'
+    )
 
-    if (error.message.startsWith('Missing required fields')) {
-      return jsonError(error.message, 400)
-    }
-
-    if (error.message.includes('not found')) {
-      return jsonError(error.message, 404)
-    }
-
-    if (error.message.includes('already exists')) {
-      return jsonError(error.message, 409)
-    }
-
-    // Default error response
-    return jsonError(error.message || 'Internal server error', 500)
+    // Return sanitized error to client
+    const { message, status } = sanitizeError(error)
+    return jsonError(message, status)
   }
 }
 
 export const toCamelCase = (obj) => {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+    return {}
+  }
+
   const result = {}
   for (const [key, value] of Object.entries(obj)) {
     const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
@@ -85,6 +151,10 @@ export const toCamelCase = (obj) => {
 }
 
 export const toSnakeCase = (obj) => {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+    return {}
+  }
+
   const result = {}
   for (const [key, value] of Object.entries(obj)) {
     const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase()

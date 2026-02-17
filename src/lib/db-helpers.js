@@ -26,9 +26,9 @@ export const getMonthSummary = async (monthId, userId) => {
     .where(and(eq(months.id, monthId), eq(months.userId, userId)))
     .limit(1)
 
-  const month = monthRows[0]
-  if (!month) return null
+  if (!monthRows || monthRows.length === 0) return null
 
+  const month = monthRows[0]
   month.is_closed = Boolean(month.is_closed)
 
   const income_entries = await db
@@ -97,18 +97,18 @@ export const getMonthSummary = async (monthId, userId) => {
     .where(eq(items.monthId, monthId))
     .orderBy(desc(items.spentOn), desc(items.id))
 
-  const total_income = income_entries.reduce((sum, e) => sum + e.amount, 0)
-  const total_fixed = fixed_expenses.reduce((sum, e) => sum + e.amount, 0)
-  const total_budgeted = budgets.reduce((sum, b) => sum + b.allocated_amount, 0)
-  const total_spent = itemsRows.reduce((sum, i) => sum + i.amount, 0)
+  const total_income = (income_entries || []).reduce((sum, e) => sum + e.amount, 0)
+  const total_fixed = (fixed_expenses || []).reduce((sum, e) => sum + e.amount, 0)
+  const total_budgeted = (budgets || []).reduce((sum, b) => sum + b.allocated_amount, 0)
+  const total_spent = (itemsRows || []).reduce((sum, i) => sum + i.amount, 0)
   const remaining = total_income - total_spent
 
   return {
     month,
-    income_entries,
-    fixed_expenses,
-    budgets,
-    items: itemsRows,
+    income_entries: income_entries || [],
+    fixed_expenses: fixed_expenses || [],
+    budgets: budgets || [],
+    items: itemsRows || [],
     total_income,
     total_fixed,
     total_budgeted,

@@ -20,7 +20,6 @@ export const GET = async ({ request, url }) => {
         .from(months)
         .where(eq(months.userId, userId))
         .orderBy(desc(months.year), desc(months.month))
-        .all()
       return jsonSuccess(allMonths)
     }
 
@@ -32,28 +31,27 @@ export const GET = async ({ request, url }) => {
     }
 
     // Try to find existing month
-    const existingMonth = await db
+    const existingMonths = await db
       .select()
       .from(months)
       .where(and(eq(months.userId, userId), eq(months.year, year), eq(months.month, month)))
-      .get()
+      .limit(1)
 
-    if (existingMonth) {
-      return jsonSuccess(existingMonth)
+    if (existingMonths.length > 0) {
+      return jsonSuccess(existingMonths[0])
     }
 
     // Create new month
-    const newMonth = await db
+    const newMonths = await db
       .insert(months)
       .values({
         userId,
         year,
         month,
-        isClosed: 0,
+        isClosed: false,
       })
       .returning()
-      .get()
 
-    return jsonSuccess(newMonth, 201)
+    return jsonSuccess(newMonths[0], 201)
   })
 }

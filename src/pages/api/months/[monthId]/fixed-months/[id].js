@@ -1,5 +1,5 @@
-import { eq, sql } from 'drizzle-orm'
-import { db, schema } from '@/lib/db.js'
+import { eq } from 'drizzle-orm'
+import { db, schema, nowSql } from '@/lib/db.js'
 import { requireAuth } from '@/lib/middleware.js'
 import { handleApiRequest, jsonSuccess, jsonError, parseIntParam } from '@/lib/api-utils.js'
 import { verifyFixedMonthOwnership } from '@/lib/db-helpers.js'
@@ -18,7 +18,7 @@ export const PUT = async ({ params, request }) => {
     const updates = {}
     if (name !== undefined) updates.name = name
     if (amount !== undefined) updates.amount = amount
-    updates.updatedAt = sql`CURRENT_TIMESTAMP`
+    updates.updatedAt = nowSql
 
     if (Object.keys(updates).length === 1) {
       return jsonError('No fields to update', 400)

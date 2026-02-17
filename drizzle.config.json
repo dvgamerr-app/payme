@@ -1,8 +1,8 @@
 {
-  "schema": "./src/lib/schema/sqlite.js",
+  "schema": "./src/lib/schema/postgres.js",
   "out": "./drizzle",
-  "dialect": "sqlite",
+  "dialect": "postgresql",
   "dbCredentials": {
-    "url": "file:./payme.db"
+    "url": "postgresql://postgres:postgres@localhost:5432/payme"
   }
 }

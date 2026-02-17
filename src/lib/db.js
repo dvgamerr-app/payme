@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import Database from 'better-sqlite3'
 import postgres from 'postgres'
 import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3'

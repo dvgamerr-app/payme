@@ -1,62 +1,74 @@
-## PayMe: ความรู้พื้นฐานที่ต้องเข้าใจก่อนเริ่มทำงาน (สรุปเฉพาะใจความ)
+## PayMe — Quick Notes (สั้น/เทคนิค)
 
-### 1) ภาพรวมสถาปัตยกรรม
+### Stack / Arch
 
-- Full-stack: **Bun.js + Astro (API Routes/SSR) + Svelte (UI interactive)**
-- Routing หลักด้วย **Astro**, ส่วน UI เป็น **Svelte components**
-- DB: **SQLite (`payme.db`)** ใช้ **better-sqlite3 (sync)**
+- **Bun + Astro (SSR/API routes) + Svelte (interactive UI)**
+- Router = **Astro**, UI = **Svelte components**
+- DB = **Postgresql `payme.db`** via **better-Postgresql3 (sync)**
 
-### 2) กฎเหล็กด้านภาษา/สไตล์โค้ด
+### Code Rules (non-negotiable)
 
-- ใช้ **Vanilla JavaScript เท่านั้น** (ไม่ใช้ TypeScript, ไม่ใช้ JSDoc)
-- Format ต้องผ่าน **Prettier เท่านั้น** (single source of truth)
-  - `semi: false`, `singleQuote: true`
+- **Vanilla JS only** (no TS, no JSDoc)
+- Format = **Prettier only** (`semi:false`, `singleQuote:true`)
+- Prefer `const` + arrow fn (avoid `function`)
+- Commit flow: **Husky + lint-staged** (format-on-commit)
 
-- ฟังก์ชันใช้ **`const` + arrow function** เป็นหลัก (หลีกเลี่ยง `function` declarations)
-- ก่อน commit ต้อง format (Husky + lint-staged ทำ format-on-commit)
+### UI Rules
 
-### 3) UI: หลักการทำงานและข้อห้าม
+- Reuse-first: เช็ค **`src/components/ui/`** ก่อนสร้างใหม่
+- ห้ามทำ `<input>`, `<button>`, modal เอง → ใช้ `Input.svelte`, `Button.svelte`, `Modal.svelte`
+- Styling = **Tailwind + theme tokens** (`text-foreground`, `bg-background`) รองรับ **dark/light**
 
-- **ห้ามสร้าง UI component ซ้ำ** ก่อนทำอะไรให้เช็ค **`src/components/ui/`** ก่อนเสมอ
-- ห้ามสร้าง `<input>`, `<button>`, modal/dialog เอง → ใช้ `Input.svelte`, `Button.svelte`, `Modal.svelte`
-- ใช้ Tailwind + theme tokens เช่น `text-foreground`, `bg-background` (ต้องรองรับ Dark/Light)
+### API Standard Pattern
 
-### 4) API: แพทเทิร์นมาตรฐาน (ห้ามทำให้เป็นหนี้เทคนิค)
+- Signature: `export const METHOD = async () => { ... }`
+- Must-use utilities:
+  - wrapper: `handleApiRequest()`
+  - auth: `requireAuth()` (protected)
+  - validate: `validateRequired()`
+  - parse int: `parseIntParam()`
+  - response: `jsonSuccess()` หรือ **throw Error**
 
-- ทุก endpoint ต้องใช้:
-  - `export const METHOD = async () => { ... }`
-  - wrap ด้วย `handleApiRequest()`
-  - protected ใช้ `requireAuth()`
-  - validation ใช้ `validateRequired()`, parse int ใช้ `parseIntParam()`
-  - response ใช้ `jsonSuccess()` หรือ **throw Error** (ห้ามสร้าง `new Response(JSON.stringify(...))` เอง)
+- Anti-patterns:
+  - ห้าม `new Response(JSON.stringify(...))` เอง
+  - ห้าม try/catch ซ้ำๆ, validation ซ้ำๆ, ownership check ซ้ำๆ (ให้ใช้ helpers)
 
-- ห้ามเขียน try-catch ซ้ำๆ / validation ซ้ำๆ / ownership verification ซ้ำๆ
+### Auth / Session
 
-### 5) Auth/Session
+- Login/Register
+- **Cookie-based session** + middleware สำหรับ protected routes
+- User state = **Svelte store**
 
-- มีหน้า Login/Register
-- ใช้ **Cookie-based session** + middleware สำหรับ protected routes
-- state ผู้ใช้จัดการด้วย Svelte store
+### Core Domain (ต้องรองรับ)
 
-### 6) Data & Features หลักที่ระบบต้องรองรับ
+- CRUD: **Income, Fixed Expenses, Budgets, Spending Items**
+- Month lifecycle: **create month / close month**
+- Dashboard/Stats + charts: **LayerCake** (Svelte-native)
+- **Import/Export JSON**, Analytics (incl. variance), Savings
 
-- REST CRUD ครบสำหรับ: **Income, Fixed Expenses, Budgets, Spending Items**
-- Month management: สร้างเดือนใหม่ / ปิดงบเดือน
-- Dashboard/Stats + กราฟ (เลือกใช้ **LayerCake** เพราะเป็น Svelte-native)
-- Import/Export JSON, Analytics (รวม variance), Savings
+### DB Migration
 
-### 7) Migration (DB)
+- Flow: **update schema → drizzle-kit generate → review SQL → controlled execute → commit schema + migration**
 
-- แก้ **schema ก่อนเสมอ** → generate ด้วย **drizzle-kit** → review SQL → execute แบบ controlled → commit ทั้ง schema + migration
+### Security (CRITICAL)
 
-### 8) ไฟล์/โฟลเดอร์ที่ต้องรู้จัก (สำคัญสุด)
+- Error hygiene:
+  - ห้ามส่ง **SQL/params/stack trace/internal path** ไป client
+  - ห้าม expose `error.message` จาก DB/ORM ตรงๆ
+  - ใช้ `handleApiRequest()` + `sanitizeError()` ใน `api-utils.js`
+  - Full log = backend only, client = generic msg
 
-- `src/components/ui/` (reuse components ก่อนสร้างใหม่)
-- `src/lib/api-utils.js` (jsonSuccess/jsonError/validate/handleApiRequest/ฯลฯ)
-- `src/lib/db-helpers.js` (ownership + helper DB)
+- Data exposure: ห้ามส่ง **password hash/token/credential** ใน response/error
+- Input: ใช้ `validateRequired()` + `parseIntParam()` เสมอ, sanitize ก่อน query
+
+### Must-know Paths
+
+- `src/components/ui/` (UI reuse)
+- `src/lib/api-utils.js` (handleApiRequest/jsonSuccess/jsonError/validate/sanitize)
+- `src/lib/db-helpers.js` (ownership + DB helpers)
 - `src/lib/middleware.js` (requireAuth/withAuth)
 
-### 9) หลักปฏิบัติระหว่างทำงาน
+### Working Protocol
 
-- ทำตาม checklist ทุกครั้ง (ลดหลุด/ลืมมาตรฐาน)
-- โค้ดใหม่ต้อง “เข้ากรอบเดิม” ก่อน: reuse, DRY, utilities-first, consistent patterns
+- Follow checklist ทุกครั้ง
+- New code ต้อง **fit existing conventions**: reuse-first, DRY, utilities-first, consistent patterns
