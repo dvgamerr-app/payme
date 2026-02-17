@@ -27,9 +27,7 @@ export const users = pgTable(
     retirementSavings: doublePrecision('retirement_savings').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => ({
-    usernameUnique: uniqueIndex('users_username_unique').on(table.username),
-  })
+  (table) => [uniqueIndex('users_username_unique').on(table.username)]
 )
 
 export const fixedExpenses = pgTable('fixed_expenses', {
@@ -61,10 +59,10 @@ export const fixedMonths = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => ({
-    byUserMonth: index('idx_fixed_months_user_month').on(table.userId, table.monthId),
-    byMonth: index('idx_fixed_months_month').on(table.monthId),
-  })
+  (table) => [
+    index('idx_fixed_months_user_month').on(table.userId, table.monthId),
+    index('idx_fixed_months_month').on(table.monthId),
+  ]
 )
 
 export const userSettings = pgTable('user_settings', {
@@ -100,14 +98,10 @@ export const months = pgTable(
     isClosed: boolean('is_closed').notNull().default(false),
     closedAt: timestamp('closed_at', { withTimezone: true }),
   },
-  (table) => ({
-    uniqueMonth: uniqueIndex('months_user_year_month_unique').on(
-      table.userId,
-      table.year,
-      table.month
-    ),
-    byUserYearMonth: index('idx_months_user_year_month').on(table.userId, table.year, table.month),
-  })
+  (table) => [
+    uniqueIndex('months_user_year_month_unique').on(table.userId, table.year, table.month),
+    index('idx_months_user_year_month').on(table.userId, table.year, table.month),
+  ]
 )
 
 export const incomeEntries = pgTable(
@@ -121,9 +115,7 @@ export const incomeEntries = pgTable(
     amount: doublePrecision('amount').notNull(),
     displayOrder: integer('display_order').notNull().default(0),
   },
-  (table) => ({
-    byMonth: index('idx_income_month').on(table.monthId),
-  })
+  (table) => [index('idx_income_month').on(table.monthId)]
 )
 
 export const monthlyBudgets = pgTable(
@@ -138,13 +130,10 @@ export const monthlyBudgets = pgTable(
       .references(() => budgetCategories.id, { onDelete: 'cascade' }),
     allocatedAmount: doublePrecision('allocated_amount').notNull(),
   },
-  (table) => ({
-    uniqueMonthCategory: uniqueIndex('monthly_budgets_month_category_unique').on(
-      table.monthId,
-      table.categoryId
-    ),
-    byMonth: index('idx_monthly_budgets_month').on(table.monthId),
-  })
+  (table) => [
+    uniqueIndex('monthly_budgets_month_category_unique').on(table.monthId, table.categoryId),
+    index('idx_monthly_budgets_month').on(table.monthId),
+  ]
 )
 
 export const items = pgTable(
@@ -161,9 +150,7 @@ export const items = pgTable(
     amount: doublePrecision('amount').notNull(),
     spentOn: text('spent_on').notNull(),
   },
-  (table) => ({
-    byMonth: index('idx_items_month').on(table.monthId),
-  })
+  (table) => [index('idx_items_month').on(table.monthId)]
 )
 
 export const monthlySnapshots = pgTable(
@@ -176,9 +163,7 @@ export const monthlySnapshots = pgTable(
     pdfData: bytea('pdf_data').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => ({
-    uniqueMonth: uniqueIndex('monthly_snapshots_month_unique').on(table.monthId),
-  })
+  (table) => [uniqueIndex('monthly_snapshots_month_unique').on(table.monthId)]
 )
 
 export const auditLogs = pgTable(
@@ -196,9 +181,7 @@ export const auditLogs = pgTable(
     userAgent: text('user_agent'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => ({
-    byUser: index('idx_audit_user').on(table.userId),
-  })
+  (table) => [index('idx_audit_user').on(table.userId)]
 )
 
 export const sessions = pgTable(
@@ -212,9 +195,9 @@ export const sessions = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   },
-  (table) => ({
-    byUser: index('idx_sessions_user').on(table.userId),
-    byExpires: index('idx_sessions_expires').on(table.expiresAt),
-    byToken: uniqueIndex('idx_sessions_token').on(table.token),
-  })
+  (table) => [
+    index('idx_sessions_user').on(table.userId),
+    index('idx_sessions_expires').on(table.expiresAt),
+    uniqueIndex('idx_sessions_token').on(table.token),
+  ]
 )

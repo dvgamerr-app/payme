@@ -13,9 +13,7 @@ export const users = sqliteTable(
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },
-  (table) => ({
-    usernameUnique: uniqueIndex('users_username_unique').on(table.username),
-  })
+  (table) => [uniqueIndex('users_username_unique').on(table.username)]
 )
 
 export const fixedExpenses = sqliteTable('fixed_expenses', {
@@ -51,10 +49,10 @@ export const fixedMonths = sqliteTable(
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },
-  (table) => ({
-    byUserMonth: index('idx_fixed_months_user_month').on(table.userId, table.monthId),
-    byMonth: index('idx_fixed_months_month').on(table.monthId),
-  })
+  (table) => [
+    index('idx_fixed_months_user_month').on(table.userId, table.monthId),
+    index('idx_fixed_months_month').on(table.monthId),
+  ]
 )
 
 export const userSettings = sqliteTable('user_settings', {
@@ -92,14 +90,10 @@ export const months = sqliteTable(
     isClosed: integer('is_closed', { mode: 'boolean' }).notNull().default(false),
     closedAt: text('closed_at'),
   },
-  (table) => ({
-    uniqueMonth: uniqueIndex('months_user_year_month_unique').on(
-      table.userId,
-      table.year,
-      table.month
-    ),
-    byUserYearMonth: index('idx_months_user_year_month').on(table.userId, table.year, table.month),
-  })
+  (table) => [
+    uniqueIndex('months_user_year_month_unique').on(table.userId, table.year, table.month),
+    index('idx_months_user_year_month').on(table.userId, table.year, table.month),
+  ]
 )
 
 export const incomeEntries = sqliteTable(
@@ -113,9 +107,7 @@ export const incomeEntries = sqliteTable(
     amount: real('amount').notNull(),
     displayOrder: integer('display_order').notNull().default(0),
   },
-  (table) => ({
-    byMonth: index('idx_income_month').on(table.monthId),
-  })
+  (table) => [index('idx_income_month').on(table.monthId)]
 )
 
 export const monthlyBudgets = sqliteTable(
@@ -130,13 +122,10 @@ export const monthlyBudgets = sqliteTable(
       .references(() => budgetCategories.id, { onDelete: 'cascade' }),
     allocatedAmount: real('allocated_amount').notNull(),
   },
-  (table) => ({
-    uniqueMonthCategory: uniqueIndex('monthly_budgets_month_category_unique').on(
-      table.monthId,
-      table.categoryId
-    ),
-    byMonth: index('idx_monthly_budgets_month').on(table.monthId),
-  })
+  (table) => [
+    uniqueIndex('monthly_budgets_month_category_unique').on(table.monthId, table.categoryId),
+    index('idx_monthly_budgets_month').on(table.monthId),
+  ]
 )
 
 export const items = sqliteTable(
@@ -153,9 +142,7 @@ export const items = sqliteTable(
     amount: real('amount').notNull(),
     spentOn: text('spent_on').notNull(),
   },
-  (table) => ({
-    byMonth: index('idx_items_month').on(table.monthId),
-  })
+  (table) => [index('idx_items_month').on(table.monthId)]
 )
 
 export const monthlySnapshots = sqliteTable(
@@ -170,9 +157,7 @@ export const monthlySnapshots = sqliteTable(
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },
-  (table) => ({
-    uniqueMonth: uniqueIndex('monthly_snapshots_month_unique').on(table.monthId),
-  })
+  (table) => [uniqueIndex('monthly_snapshots_month_unique').on(table.monthId)]
 )
 
 export const auditLogs = sqliteTable(
@@ -192,9 +177,7 @@ export const auditLogs = sqliteTable(
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
   },
-  (table) => ({
-    byUser: index('idx_audit_user').on(table.userId),
-  })
+  (table) => [index('idx_audit_user').on(table.userId)]
 )
 
 export const sessions = sqliteTable(
@@ -210,9 +193,9 @@ export const sessions = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
     expiresAt: text('expires_at').notNull(),
   },
-  (table) => ({
-    byUser: index('idx_sessions_user').on(table.userId),
-    byExpires: index('idx_sessions_expires').on(table.expiresAt),
-    byToken: uniqueIndex('idx_sessions_token').on(table.token),
-  })
+  (table) => [
+    index('idx_sessions_user').on(table.userId),
+    index('idx_sessions_expires').on(table.expiresAt),
+    uniqueIndex('idx_sessions_token').on(table.token),
+  ]
 )
