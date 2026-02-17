@@ -1,11 +1,11 @@
 import 'dotenv/config'
-import Database from 'better-sqlite3'
+// import Database from 'better-sqlite3'
 import postgres from 'postgres'
-import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3'
+// import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3'
 import { drizzle as drizzlePostgres } from 'drizzle-orm/postgres-js'
 import { sql } from 'drizzle-orm'
-import { join } from 'path'
-import * as sqliteSchema from './schema/sqlite.js'
+// import { join } from 'path'
+// import * as sqliteSchema from './schema/sqlite.js'
 import * as postgresSchema from './schema/postgres.js'
 import url from 'url'
 
@@ -25,12 +25,12 @@ if (isPostgres) {
   const client = postgres(connectionString, { max: 10 })
   db = drizzlePostgres(client, { schema: postgresSchema })
   schema = postgresSchema
-} else if (scheme === 'sqlite') {
-  const dbPath = process.env.DATABASE_PATH || join(process.cwd(), 'payme.db')
-  const sqlite = new Database(dbPath)
-  sqlite.pragma('foreign_keys = ON')
-  db = drizzleSqlite(sqlite, { schema: sqliteSchema })
-  schema = sqliteSchema
+  // } else if (scheme === 'sqlite') {
+  //   const dbPath = process.env.DATABASE_PATH || join(process.cwd(), 'payme.db')
+  //   const sqlite = new Database(dbPath)
+  //   sqlite.pragma('foreign_keys = ON')
+  //   db = drizzleSqlite(sqlite, { schema: sqliteSchema })
+  //   schema = sqliteSchema
 } else {
   throw new Error(`Unsupported database scheme: ${scheme}`)
 }

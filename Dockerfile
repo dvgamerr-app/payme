@@ -1,33 +1,60 @@
-FROM rustlang/rust:nightly-bookworm AS backend-builder
-WORKDIR /build
-COPY backend/Cargo.toml backend/Cargo.lock ./
-COPY backend/src ./src
-RUN cargo build --release
+# Build stage
+FROM oven/bun:1-alpine AS builder
 
-FROM node:22-bookworm AS frontend-builder
-WORKDIR /build
-COPY frontend/package*.json ./
-RUN npm ci
-COPY frontend/ ./
-RUN npm run build
-
-FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    libsqlite3-0 \
-    && rm -rf /var/lib/apt/lists/*
+# Install runtime dependencies for native modules
+RUN apk add --no-cache make g++
 
 WORKDIR /app
 
-COPY --from=backend-builder /build/target/release/payme /usr/local/bin/payme
-COPY --from=frontend-builder /build/dist ./static
+# Copy package files
+COPY package.json bun.lock ./
 
-ENV DATABASE_URL=sqlite:/data/payme.db?mode=rwc
-ENV PORT=3001
+# Install dependencies
+RUN bun install --frozen-lockfile
 
-EXPOSE 3001
+# Copy source code
+COPY . .
 
-VOLUME ["/data"]
+# Build the application
+RUN bun run build
 
-CMD ["payme"]
+# Migration stage (includes devDependencies for drizzle-kit)
+FROM oven/bun:1-alpine AS migration
 
+WORKDIR /app
+
+# Copy package files
+COPY package.json bun.lock ./
+
+# Install ALL dependencies (including devDependencies)
+RUN bun install --frozen-lockfile
+
+# Copy source files and migrations
+COPY drizzle ./drizzle
+COPY drizzle.config.js ./
+COPY src ./src
+
+# Production stage
+FROM oven/bun:1-alpine
+
+WORKDIR /app
+
+# Copy package files and install production dependencies
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/bun.lock ./bun.lock
+
+# Install production dependencies (needed for runtime)
+RUN bun install --production --frozen-lockfile --ignore-scripts
+
+# Copy built application from builder
+COPY --from=builder /app/dist ./dist
+
+# Expose port
+EXPOSE 3000
+
+# Set environment variables
+ENV HOST=0.0.0.0
+ENV PORT=3000
+
+# Start the Bun server directly from built output
+CMD ["bun", "run", "./dist/server/entry.mjs"]
