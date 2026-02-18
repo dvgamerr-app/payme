@@ -13,7 +13,7 @@
   // Build unified sorted month axis
   $: monthKeys = (() => {
     const set = new Set()
-    for (const u of usersTrends) {
+    for (const u of activeUsersTrends) {
       for (const m of u.monthly_trends) {
         set.add(`${m.year}-${String(m.month).padStart(2, '0')}`)
       }
@@ -21,8 +21,11 @@
     return Array.from(set).sort()
   })()
 
+  // Only include users that have actual monthly data
+  $: activeUsersTrends = usersTrends.filter((u) => u.monthly_trends.length > 0)
+
   // Per-user map: key → total_spent
-  $: userMaps = usersTrends.map((u) => {
+  $: userMaps = activeUsersTrends.map((u) => {
     const map = new Map()
     for (const m of u.monthly_trends) {
       map.set(`${m.year}-${String(m.month).padStart(2, '0')}`, m.total_spent)
@@ -59,7 +62,7 @@
   <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
     <h3 class="text-foreground text-sm font-semibold tracking-wide uppercase">{title}</h3>
     <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-      {#each usersTrends as u, i}
+      {#each activeUsersTrends as u, i}
         <div class="flex items-center gap-1.5">
           <div class="h-2.5 w-2.5" style="background:{COLORS[i % COLORS.length]};"></div>
           <span class="text-muted-foreground">{u.username}</span>

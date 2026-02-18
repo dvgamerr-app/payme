@@ -8,10 +8,13 @@
 
   $: currencySymbol = $settings.currencySymbol || '฿'
 
+  // Only include users that have actual monthly data
+  $: activeUsersTrends = usersTrends.filter((u) => u.monthly_trends.length > 0)
+
   // Build a unified sorted list of (year-month) keys across
   $: monthKeys = (() => {
     const set = new Set()
-    for (const u of usersTrends) {
+    for (const u of activeUsersTrends) {
       for (const m of u.monthly_trends) {
         set.add(`${m.year}-${String(m.month).padStart(2, '0')}`)
       }
@@ -25,7 +28,7 @@
   }
 
   // Per-user lookup: key → { income, spent }
-  $: userMaps = usersTrends.map((u) => {
+  $: userMaps = activeUsersTrends.map((u) => {
     const map = new Map()
     for (const m of u.monthly_trends) {
       map.set(`${m.year}-${String(m.month).padStart(2, '0')}`, {
@@ -114,7 +117,7 @@
     </h3>
     <!-- Legend -->
     <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-      {#each usersTrends as u, i}
+      {#each activeUsersTrends as u, i}
         <div class="flex items-center gap-1.5">
           <div class="h-2 w-2" style="background:{INCOME_COLORS[i % INCOME_COLORS.length]};"></div>
           <span class="text-muted-foreground">{u.username} income</span>
@@ -130,7 +133,7 @@
     </div>
   </div>
 
-  {#if rows.length > 0 && usersTrends.length > 0}
+  {#if rows.length > 0 && activeUsersTrends.length > 0}
     <div>
       <table
         class="charts-css line multiple show-labels show-data-axes data-spacing-2"

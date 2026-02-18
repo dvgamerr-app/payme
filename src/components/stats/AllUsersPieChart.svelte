@@ -14,7 +14,6 @@
       username: u.username,
       total: u.monthly_trends.reduce((sum, m) => sum + m.total_spent, 0),
     }))
-    .filter((u) => u.total > 0)
     .sort((a, b) => b.total - a.total)
 
   $: grandTotal = userTotals.reduce((sum, u) => sum + u.total, 0)
@@ -102,7 +101,7 @@
     </div>
   {:else}
     <div class="text-muted-foreground flex h-40 items-center justify-center text-sm">
-      No spending data available
+      No data available
     </div>
   {/if}
 </Card>

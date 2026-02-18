@@ -198,7 +198,7 @@ export async function getAllUsersStatsData() {
     .from(users)
     .orderBy(asc(users.id))
 
-  // Get last 12 months across all users (exclude future months)
+  // Get last 12 months per user (exclude future months) — no global limit to avoid truncating users
   const allMonthRows = await db
     .select({ id: months.id, userId: months.userId, year: months.year, month: months.month })
     .from(months)
@@ -209,23 +209,31 @@ export async function getAllUsersStatsData() {
       )
     )
     .orderBy(desc(months.year), desc(months.month))
-    .limit(200)
 
-  const allMonthIds = allMonthRows.map((r) => r.id)
+  // Slice 12 months per user, collect only needed monthIds
+  const perUserMonths = new Map()
+  for (const u of allUsers) {
+    const userMonths = allMonthRows.filter((r) => r.userId === u.id).slice(0, 12)
+    perUserMonths.set(u.id, userMonths)
+  }
+
+  const neededMonthIds = [
+    ...new Set([...perUserMonths.values()].flatMap((rows) => rows.map((r) => r.id))),
+  ]
 
   // Income by monthId
   const incomeByMonth = new Map()
   // Spent by monthId
   const spentByMonth = new Map()
 
-  if (allMonthIds.length > 0) {
+  if (neededMonthIds.length > 0) {
     const incomeRows = await db
       .select({
         month_id: incomeEntries.monthId,
         total_income: sql`COALESCE(SUM(${incomeEntries.amount}), 0)`,
       })
       .from(incomeEntries)
-      .where(inArray(incomeEntries.monthId, allMonthIds))
+      .where(inArray(incomeEntries.monthId, neededMonthIds))
       .groupBy(incomeEntries.monthId)
     for (const row of incomeRows) incomeByMonth.set(row.month_id, Number(row.total_income || 0))
 
@@ -235,14 +243,14 @@ export async function getAllUsersStatsData() {
         total_spent: sql`COALESCE(SUM(${items.amount}), 0)`,
       })
       .from(items)
-      .where(inArray(items.monthId, allMonthIds))
+      .where(inArray(items.monthId, neededMonthIds))
       .groupBy(items.monthId)
     for (const row of spentRows) spentByMonth.set(row.month_id, Number(row.total_spent || 0))
   }
 
   // Build per-user trends (last 12 months per user)
   const users_trends = allUsers.map((u) => {
-    const userMonths = allMonthRows.filter((r) => r.userId === u.id).slice(0, 12)
+    const userMonths = perUserMonths.get(u.id) ?? []
 
     const monthly_trends = userMonths.map((row) => ({
       year: row.year,
@@ -269,15 +277,17 @@ export async function getAllUsersStatsData() {
     }
   })
 
-  // Build combined trend: aggregate income+spent per (year, month) across all users
+  // Build combined trend: aggregate income+spent per (year, month) across per-user months
   const combinedMap = new Map()
-  for (const row of allMonthRows) {
-    const key = `${row.year}-${String(row.month).padStart(2, '0')}`
-    if (!combinedMap.has(key))
-      combinedMap.set(key, { year: row.year, month: row.month, total_income: 0, total_spent: 0 })
-    const entry = combinedMap.get(key)
-    entry.total_income += incomeByMonth.get(row.id) ?? 0
-    entry.total_spent += spentByMonth.get(row.id) ?? 0
+  for (const userMonths of perUserMonths.values()) {
+    for (const row of userMonths) {
+      const key = `${row.year}-${String(row.month).padStart(2, '0')}`
+      if (!combinedMap.has(key))
+        combinedMap.set(key, { year: row.year, month: row.month, total_income: 0, total_spent: 0 })
+      const entry = combinedMap.get(key)
+      entry.total_income += incomeByMonth.get(row.id) ?? 0
+      entry.total_spent += spentByMonth.get(row.id) ?? 0
+    }
   }
 
   // Sort descending (newest first), take last 12 distinct months
