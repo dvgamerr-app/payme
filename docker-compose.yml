@@ -23,7 +23,6 @@ services:
         condition: service_healthy
     command: >
       sh -c "
-        echo 'Waiting for database to be ready...' &&
         echo 'Running migrations...' &&
         bun x drizzle-kit push --config=drizzle.config.js &&
         echo 'Migrations completed successfully!'

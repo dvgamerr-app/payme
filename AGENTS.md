@@ -44,7 +44,7 @@
 
 - CRUD: **Income, Fixed Expenses, Budgets, Spending Items**
 - Month lifecycle: **create month / close month**
-- Dashboard/Stats + charts: **LayerCake** (Svelte-native)
+- Dashboard/Stats + charts: **Charts.css** (pure CSS, high performance)
 - **Import/Export JSON**, Analytics (incl. variance), Savings
 
 ### DB Migration
