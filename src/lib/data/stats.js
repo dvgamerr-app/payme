@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, gte, inArray, or, sql } from 'drizzle-orm'
 import { db, schema } from '@/lib/db.js'
 
-const { budgetCategories, fixedMonths, incomeEntries, items, months } = schema
+const { budgetCategories, fixedMonths, incomeEntries, items, months, users } = schema
 
 export async function getStatsData(user) {
   const now = new Date()
@@ -172,5 +172,118 @@ export async function getStatsData(user) {
     monthly_trends, // Descending (Newest first)
     average_monthly_spending,
     average_monthly_income,
+  }
+}
+
+/**
+ * Get stats data for ALL users (admin view)
+ * Returns per-user monthly trends and a combined aggregate trend
+ */
+export async function getAllUsersStatsData() {
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.getMonth() + 1
+
+  // Get all users
+  const allUsers = await db
+    .select({ id: users.id, username: users.username })
+    .from(users)
+    .orderBy(asc(users.id))
+
+  // Get last 12 months across all users
+  const allMonthRows = await db
+    .select({ id: months.id, userId: months.userId, year: months.year, month: months.month })
+    .from(months)
+    .orderBy(desc(months.year), desc(months.month))
+    .limit(200)
+
+  const allMonthIds = allMonthRows.map((r) => r.id)
+
+  // Income by monthId
+  const incomeByMonth = new Map()
+  // Spent by monthId
+  const spentByMonth = new Map()
+
+  if (allMonthIds.length > 0) {
+    const incomeRows = await db
+      .select({
+        month_id: incomeEntries.monthId,
+        total_income: sql`COALESCE(SUM(${incomeEntries.amount}), 0)`,
+      })
+      .from(incomeEntries)
+      .where(inArray(incomeEntries.monthId, allMonthIds))
+      .groupBy(incomeEntries.monthId)
+    for (const row of incomeRows) incomeByMonth.set(row.month_id, Number(row.total_income || 0))
+
+    const spentRows = await db
+      .select({
+        month_id: items.monthId,
+        total_spent: sql`COALESCE(SUM(${items.amount}), 0)`,
+      })
+      .from(items)
+      .where(inArray(items.monthId, allMonthIds))
+      .groupBy(items.monthId)
+    for (const row of spentRows) spentByMonth.set(row.month_id, Number(row.total_spent || 0))
+  }
+
+  // Build per-user trends (last 12 months per user)
+  const users_trends = allUsers.map((u) => {
+    const userMonths = allMonthRows.filter((r) => r.userId === u.id).slice(0, 12)
+
+    const monthly_trends = userMonths.map((row) => ({
+      year: row.year,
+      month: row.month,
+      total_income: incomeByMonth.get(row.id) ?? 0,
+      total_spent: spentByMonth.get(row.id) ?? 0,
+    }))
+
+    const avg_spending =
+      monthly_trends.length > 0
+        ? monthly_trends.reduce((s, m) => s + m.total_spent, 0) / monthly_trends.length
+        : 0
+    const avg_income =
+      monthly_trends.length > 0
+        ? monthly_trends.reduce((s, m) => s + m.total_income, 0) / monthly_trends.length
+        : 0
+
+    return {
+      user_id: u.id,
+      username: u.username,
+      monthly_trends, // Descending (newest first) — reversed client-side
+      average_monthly_spending: avg_spending,
+      average_monthly_income: avg_income,
+    }
+  })
+
+  // Build combined trend: aggregate income+spent per (year, month) across all users
+  const combinedMap = new Map()
+  for (const row of allMonthRows) {
+    const key = `${row.year}-${String(row.month).padStart(2, '0')}`
+    if (!combinedMap.has(key))
+      combinedMap.set(key, { year: row.year, month: row.month, total_income: 0, total_spent: 0 })
+    const entry = combinedMap.get(key)
+    entry.total_income += incomeByMonth.get(row.id) ?? 0
+    entry.total_spent += spentByMonth.get(row.id) ?? 0
+  }
+
+  // Sort descending (newest first), take last 12 distinct months
+  const combined_trends = Array.from(combinedMap.values())
+    .sort((a, b) => b.year - a.year || b.month - a.month)
+    .slice(0, 12)
+
+  const combined_avg_spending =
+    combined_trends.length > 0
+      ? combined_trends.reduce((s, m) => s + m.total_spent, 0) / combined_trends.length
+      : 0
+  const combined_avg_income =
+    combined_trends.length > 0
+      ? combined_trends.reduce((s, m) => s + m.total_income, 0) / combined_trends.length
+      : 0
+
+  return {
+    users_trends,
+    combined_trends, // Descending (newest first) — reversed client-side
+    combined_avg_spending,
+    combined_avg_income,
   }
 }

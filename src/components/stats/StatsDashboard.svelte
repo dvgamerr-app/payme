@@ -29,22 +29,58 @@
 
   // Use store data if available, otherwise use SSR data
   $: statsData = $stats.data || data
+  $: allUsers = statsData.all_users ?? null
 </script>
 
 <Layout showBack={true}>
   <div class="space-y-6">
-    <!-- Summary Cards -->
+    <!-- Summary Cards (own) -->
     <SummaryCards
       avgIncome={statsData.average_monthly_income}
       avgSpent={statsData.average_monthly_spending}
     />
 
     <div class="grid grid-cols-1 gap-16 lg:grid-cols-2">
-      <!-- Trend Chart -->
-      <TrendChart data={statsData.monthly_trends} />
+      <!-- Own Trend Chart -->
+      <TrendChart data={statsData.monthly_trends} title="Monthly Trends (You)" />
 
       <!-- Category Breakdown -->
       <CategoryBreakdown comparisons={statsData.category_comparisons} />
     </div>
+
+    <!-- Admin: All-users section -->
+    {#if allUsers}
+      <div class="border-border border-t pt-6">
+        <h2 class="text-foreground mb-4 text-base font-semibold tracking-wide uppercase">
+          All Users Overview
+        </h2>
+
+        <!-- Combined summary cards -->
+        <SummaryCards
+          avgIncome={allUsers.combined_avg_income}
+          avgSpent={allUsers.combined_avg_spending}
+          label="Combined"
+        />
+
+        <!-- Combined trend chart -->
+        <div class="mt-6">
+          <TrendChart data={allUsers.combined_trends} title="Combined Monthly Trends (All Users)" />
+        </div>
+
+        <!-- Per-user trend charts -->
+        {#if allUsers.users_trends?.length > 0}
+          <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2">
+            {#each allUsers.users_trends as userStat}
+              <div>
+                <p class="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
+                  {userStat.username}
+                </p>
+                <TrendChart data={userStat.monthly_trends} title="Trends — {userStat.username}" />
+              </div>
+            {/each}
+          </div>
+        {/if}
+      </div>
+    {/if}
   </div>
 </Layout>

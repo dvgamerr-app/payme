@@ -15,6 +15,13 @@
       "when": 1771319010004,
       "tag": "0001_lumpy_loa",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771389033548,
+      "tag": "0002_uneven_switch",
+      "breakpoints": true
     }
   ]
 }

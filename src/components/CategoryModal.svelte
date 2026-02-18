@@ -5,12 +5,14 @@
   import DeleteButton from './ui/DeleteButton.svelte'
   import { api } from '@/lib/api.js'
   import { settings } from '@/stores/settings.js'
+  import { auth } from '@/stores/auth.js'
   import { formatCurrency } from '@/lib/format-utils.js'
 
   export let categories = []
   export let onUpdate = () => {}
 
   $: currencySymbol = $settings.currencySymbol || '฿'
+  $: isAdmin = $auth.user?.role === 'admin'
 
   let isAdding = false
   let editingId = null
@@ -90,7 +92,7 @@
 </script>
 
 <div class="flex flex-col gap-2.5">
-  {#if isAdding}
+  {#if isAdmin && isAdding}
     <div class="flex items-end gap-2 pl-4">
       <div class="flex-1">
         <Input
@@ -117,7 +119,7 @@
   {/if}
 
   <div class="space-y-0">
-    {#if !isAdding}
+    {#if isAdmin && !isAdding}
       <button
         on:click={() => (isAdding = true)}
         class="border-border hover:bg-accent flex w-full items-center gap-2 border border-dashed px-4 py-3 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
@@ -159,7 +161,7 @@
             </div>
           {:else}
             <button
-              on:dblclick={() => startEdit(category)}
+              on:dblclick={() => isAdmin && startEdit(category)}
               class="text-foreground flex flex-1 items-center justify-between px-4 py-3 text-left text-sm"
               disabled={isAdding || editingId}
             >
@@ -170,7 +172,9 @@
                 {formatCurrency(category.default_amount || 0, currencySymbol)}
               </span>
             </button>
-            <DeleteButton onDelete={() => handleDelete(category.id)} confirmText="Delete?" />
+            {#if isAdmin}
+              <DeleteButton onDelete={() => handleDelete(category.id)} confirmText="Delete?" />
+            {/if}
           {/if}
         </div>
       {/each}

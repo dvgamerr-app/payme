@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-import { eq } from 'drizzle-orm'
+import { count, eq } from 'drizzle-orm'
 import logger from './logger.js'
 import { db, schema, dbDialect } from './db.js'
 
@@ -163,6 +163,7 @@ export const getUserById = async (userId) => {
     .select({
       id: users.id,
       username: users.username,
+      role: users.role,
       savings: users.savings,
       retirementSavings: users.retirementSavings,
     })
@@ -185,19 +186,28 @@ export const registerUser = async (username, password) => {
   const passwordHash = await hashPassword(password)
 
   try {
+    // Check if this is the first user → assign admin role
+    const countResult = await db.select({ value: count() }).from(users)
+    const existingCount = Number(countResult[0]?.value ?? 0)
+    const role = existingCount === 0 ? 'admin' : 'user'
+
     const rows = await db
       .insert(users)
-      .values({ username, passwordHash })
-      .returning({ id: users.id, username: users.username })
+      .values({ username, passwordHash, role })
+      .returning({ id: users.id, username: users.username, role: users.role })
     const user = rows[0]
 
-    // สร้าง default category "อื่นๆ" ให้ผู้ใช้ใหม่
+    // Insert default category "อื่นๆ" only if no categories exist yet (shared across users)
     if (user) {
-      await db.insert(budgetCategories).values({
-        userId: user.id,
-        label: 'อื่นๆ',
-        defaultAmount: 0,
-      })
+      const catCount = await db.select({ value: count() }).from(budgetCategories)
+      const catRows = Number(catCount[0]?.value ?? 0)
+      if (catRows === 0) {
+        await db.insert(budgetCategories).values({
+          userId: user.id,
+          label: 'อื่นๆ',
+          defaultAmount: 0,
+        })
+      }
     }
 
     return user

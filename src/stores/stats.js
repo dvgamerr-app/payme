@@ -19,6 +19,18 @@ function createStatsStore() {
         if (data.monthly_trends) {
           data.monthly_trends = [...data.monthly_trends].reverse()
         }
+        // Reverse all-users trends too
+        if (data.all_users) {
+          if (data.all_users.combined_trends) {
+            data.all_users.combined_trends = [...data.all_users.combined_trends].reverse()
+          }
+          if (data.all_users.users_trends) {
+            data.all_users.users_trends = data.all_users.users_trends.map((u) => ({
+              ...u,
+              monthly_trends: [...u.monthly_trends].reverse(),
+            }))
+          }
+        }
         set({ data, loading: false, error: null })
         return data
       } catch (error) {

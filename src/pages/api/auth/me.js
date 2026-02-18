@@ -20,6 +20,6 @@ export const GET = async ({ request }) => {
       return jsonError('User not found', 401)
     }
 
-    return jsonSuccess({ id: user.id, username: user.username })
+    return jsonSuccess({ id: user.id, username: user.username, role: user.role })
   })
 }

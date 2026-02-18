@@ -49,7 +49,7 @@
 
 ### DB Migration
 
-- Flow: **update schema → drizzle-kit generate → review SQL → controlled execute → commit schema + migration**
+- Flow: **update schema → drizzle-kit generate → review SQL → controlled execute → commit schema + drizzle-kit push**
 
 ### Security (CRITICAL)
 

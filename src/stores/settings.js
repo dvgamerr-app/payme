@@ -6,6 +6,7 @@ const defaultSettings = {
   baseCurrency: 'THB',
   currencySymbol: '฿',
   payday: 'end', // 'end', '25', '28'
+  currencyLocked: false,
   loaded: false,
 }
 
@@ -22,6 +23,7 @@ function createSettingsStore() {
           baseCurrency: data.baseCurrency || 'THB',
           currencySymbol: data.currencySymbol || '฿',
           payday: data.payday || 'end',
+          currencyLocked: data.currencyLocked ?? false,
           loaded: true,
         })
       } catch (error) {

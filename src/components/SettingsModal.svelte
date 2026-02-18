@@ -45,6 +45,7 @@
   // Reactive values from settings store
   $: selectedCurrency = $settings.baseCurrency || 'THB'
   $: selectedPayday = $settings.payday || 'end'
+  $: currencyLocked = $settings.currencyLocked ?? false
 
   const selectCurrency = async (currency) => {
     selectedCurrency = currency.code
@@ -110,27 +111,58 @@
 
           <div class="flex flex-col gap-4">
             <h3 class="m-0 text-[0.9375rem] font-semibold">Currency</h3>
-            <div class="grid grid-cols-1 gap-2">
-              {#each currencies as currency}
-                <button
-                  class="flex items-center gap-3 border px-3 py-2.5 text-left transition-colors {selectedCurrency ===
-                  currency.code
-                    ? 'border-[#d4a574] bg-linear-to-br from-[#d4a574]/10 to-[#d4a574]/5'
-                    : 'border-border hover:border-muted-foreground hover:bg-secondary/50'}"
-                  on:click={() => selectCurrency(currency)}
-                >
-                  <span
-                    class="bg-muted flex h-8 w-8 items-center justify-center font-mono text-sm font-medium"
+            {#if currencyLocked}
+              <div class="border-border bg-secondary/40 flex items-start gap-3 border p-3">
+                <div class="mt-0.5 shrink-0">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="square"
+                    stroke-linejoin="miter"
+                    class="text-muted-foreground"
                   >
-                    {currency.symbol}
-                  </span>
-                  <div class="flex flex-col">
-                    <span class="text-sm font-medium">{currency.code}</span>
-                    <span class="text-muted-foreground text-xs">{currency.name}</span>
-                  </div>
-                </button>
-              {/each}
-            </div>
+                    <rect x="3" y="11" width="18" height="11" rx="0" ry="0"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <p class="text-foreground text-sm font-medium">Currency cannot be changed</p>
+                  <p class="text-muted-foreground text-xs">
+                    You already have spending items recorded. Changing currency would make
+                    historical data inconsistent. Current currency: <span
+                      class="text-foreground font-medium">{selectedCurrency}</span
+                    >
+                  </p>
+                </div>
+              </div>
+            {:else}
+              <div class="grid grid-cols-1 gap-2">
+                {#each currencies as currency}
+                  <button
+                    class="flex items-center gap-3 border px-3 py-2.5 text-left transition-colors {selectedCurrency ===
+                    currency.code
+                      ? 'border-[#d4a574] bg-linear-to-br from-[#d4a574]/10 to-[#d4a574]/5'
+                      : 'border-border hover:border-muted-foreground hover:bg-secondary/50'}"
+                    on:click={() => selectCurrency(currency)}
+                  >
+                    <span
+                      class="bg-muted flex h-8 w-8 items-center justify-center font-mono text-sm font-medium"
+                    >
+                      {currency.symbol}
+                    </span>
+                    <div class="flex flex-col">
+                      <span class="text-sm font-medium">{currency.code}</span>
+                      <span class="text-muted-foreground text-xs">{currency.name}</span>
+                    </div>
+                  </button>
+                {/each}
+              </div>
+            {/if}
           </div>
 
           <div class="flex flex-col gap-4">

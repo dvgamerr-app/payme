@@ -7,6 +7,7 @@ export const users = sqliteTable(
     id: integer('id').primaryKey({ autoIncrement: true }),
     username: text('username').notNull(),
     passwordHash: text('password_hash').notNull(),
+    role: text('role').notNull().default('user'), // 'admin' | 'user'
     savings: real('savings').notNull().default(0),
     retirementSavings: real('retirement_savings').notNull().default(0),
     createdAt: text('created_at')

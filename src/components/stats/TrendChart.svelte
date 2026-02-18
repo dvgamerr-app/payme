@@ -5,6 +5,7 @@
   import 'charts.css'
 
   export let data = []
+  export let title = 'Monthly Trends'
 
   $: currencySymbol = $settings.currencySymbol || '฿'
 
@@ -20,7 +21,7 @@
 
 <Card>
   <div class="mb-4 flex items-center justify-between">
-    <h3 class="text-foreground text-sm font-semibold tracking-wide uppercase">Monthly Trends</h3>
+    <h3 class="text-foreground text-sm font-semibold tracking-wide uppercase">{title}</h3>
     <div class="flex gap-4 text-xs">
       <div class="flex items-center gap-1.5">
         <div

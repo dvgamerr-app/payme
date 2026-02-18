@@ -23,6 +23,7 @@ export const users = pgTable(
     id: serial('id').primaryKey(),
     username: text('username').notNull(),
     passwordHash: text('password_hash').notNull(),
+    role: text('role').notNull().default('user'), // 'admin' | 'user'
     savings: doublePrecision('savings').notNull().default(0),
     retirementSavings: doublePrecision('retirement_savings').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
