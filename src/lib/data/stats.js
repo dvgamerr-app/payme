@@ -71,7 +71,15 @@ export async function getStatsData(user) {
   const monthRows = await db
     .select({ id: months.id, year: months.year, month: months.month })
     .from(months)
-    .where(eq(months.userId, user.id))
+    .where(
+      and(
+        eq(months.userId, user.id),
+        or(
+          sql`${months.year} < ${currentYear}`,
+          and(sql`${months.year} = ${currentYear}`, sql`${months.month} <= ${currentMonth}`)
+        )
+      )
+    )
     .orderBy(desc(months.year), desc(months.month))
     .limit(12)
 
@@ -190,10 +198,16 @@ export async function getAllUsersStatsData() {
     .from(users)
     .orderBy(asc(users.id))
 
-  // Get last 12 months across all users
+  // Get last 12 months across all users (exclude future months)
   const allMonthRows = await db
     .select({ id: months.id, userId: months.userId, year: months.year, month: months.month })
     .from(months)
+    .where(
+      or(
+        sql`${months.year} < ${currentYear}`,
+        and(sql`${months.year} = ${currentYear}`, sql`${months.month} <= ${currentMonth}`)
+      )
+    )
     .orderBy(desc(months.year), desc(months.month))
     .limit(200)
 

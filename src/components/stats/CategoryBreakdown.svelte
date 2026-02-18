@@ -40,17 +40,15 @@
             ></div>
           </div>
           <!-- Change Stats -->
-          {#if item.change_amount !== 0}
-            <div class="text-muted-foreground flex items-center justify-end gap-1 text-[10px]">
-              <span>vs Last Year:</span>
-              <span class={item.change_amount > 0 ? 'text-destructive' : 'text-success'}>
-                {item.change_amount > 0 ? '+' : ''}{formatCurrency(
-                  item.change_amount,
-                  currencySymbol
-                )}
-              </span>
-            </div>
-          {/if}
+          <div class="text-muted-foreground flex items-center justify-end gap-1 text-[10px]">
+            <span>vs Last Year:</span>
+            <span class={item.change_amount > 0 ? 'text-destructive' : 'text-success'}>
+              {item.change_amount > 0 ? '+' : ''}{formatCurrency(
+                item.change_amount,
+                currencySymbol
+              )}
+            </span>
+          </div>
         </div>
       {/each}
     </div>

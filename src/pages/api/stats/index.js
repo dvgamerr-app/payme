@@ -7,12 +7,7 @@ export const GET = async ({ request }) => {
     const user = await requireAuth(request)
     const stats = await getStatsData(user)
 
-    // Admin also gets all-users overview
-    if (user.role === 'admin') {
-      const allUsers = await getAllUsersStatsData()
-      return jsonSuccess({ ...stats, all_users: allUsers })
-    }
-
-    return jsonSuccess(stats)
+    const all = await getAllUsersStatsData()
+    return jsonSuccess({ ...stats, all })
   })
 }

@@ -5,6 +5,9 @@
   import TrendChart from './TrendChart.svelte'
   import CategoryBreakdown from './CategoryBreakdown.svelte'
   import SummaryCards from './SummaryCards.svelte'
+  import AllUsersPieChart from './AllUsersPieChart.svelte'
+  import AllUsersLineChart from './AllUsersLineChart.svelte'
+  import AllUsersStackedChart from './AllUsersStackedChart.svelte'
   import { stats } from '@/stores/stats.js'
 
   // Props from SSR (fallback)
@@ -16,7 +19,6 @@
   }
 
   onMount(async () => {
-    // Only load if not already loaded (e.g., via Layout preload)
     const current = get(stats)
     if (!current.data && !current.loading) {
       try {
@@ -27,60 +29,50 @@
     }
   })
 
-  // Use store data if available, otherwise use SSR data
   $: statsData = $stats.data || data
-  $: allUsers = statsData.all_users ?? null
+  $: all = statsData.all ?? {}
+  $: usersTrends = all.users_trends ?? []
 </script>
 
 <Layout showBack={true}>
-  <div class="space-y-6">
-    <!-- Summary Cards (own) -->
-    <SummaryCards
-      avgIncome={statsData.average_monthly_income}
-      avgSpent={statsData.average_monthly_spending}
-    />
+  <div class="space-y-8">
+    <!-- ── SECTION 1: Your Summary ──────────────────────────────── -->
+    <section class="space-y-4">
+      <h2 class="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
+        Overview
+      </h2>
+      <!-- Summary cards: your averages + combined all-users sub-label -->
+      <SummaryCards
+        avgIncome={statsData.average_monthly_income}
+        avgSpent={statsData.average_monthly_spending}
+        totalAvgIncome={all.combined_avg_income}
+        totalAvgSpent={all.combined_avg_spending}
+      />
+    </section>
 
-    <div class="grid grid-cols-1 gap-16 lg:grid-cols-2">
-      <!-- Own Trend Chart -->
-      <TrendChart data={statsData.monthly_trends} title="Monthly Trends (You)" />
-
-      <!-- Category Breakdown -->
-      <CategoryBreakdown comparisons={statsData.category_comparisons} />
-    </div>
-
-    <!-- Admin: All-users section -->
-    {#if allUsers}
-      <div class="border-border border-t pt-6">
-        <h2 class="text-foreground mb-4 text-base font-semibold tracking-wide uppercase">
-          All Users Overview
-        </h2>
-
-        <!-- Combined summary cards -->
-        <SummaryCards
-          avgIncome={allUsers.combined_avg_income}
-          avgSpent={allUsers.combined_avg_spending}
-          label="Combined"
-        />
-
-        <!-- Combined trend chart -->
-        <div class="mt-6">
-          <TrendChart data={allUsers.combined_trends} title="Combined Monthly Trends (All Users)" />
-        </div>
-
-        <!-- Per-user trend charts -->
-        {#if allUsers.users_trends?.length > 0}
-          <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2">
-            {#each allUsers.users_trends as userStat}
-              <div>
-                <p class="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
-                  {userStat.username}
-                </p>
-                <TrendChart data={userStat.monthly_trends} title="Trends — {userStat.username}" />
-              </div>
-            {/each}
-          </div>
-        {/if}
+    <!-- ── SECTION 2: Your Trends ────────────────────────────────── -->
+    <section class="space-y-4">
+      <h2 class="text-muted-foreground text-xs font-semibold tracking-widest uppercase">Trends</h2>
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <TrendChart data={statsData.monthly_trends} title="Monthly Trends (You)" />
+        <CategoryBreakdown comparisons={statsData.category_comparisons} />
       </div>
+    </section>
+
+    <!-- ── SECTION 3: Users ──────────────────────────────────── -->
+    {#if usersTrends.length > 0}
+      <section class="border-border space-y-4 border-t pt-6">
+        <h2 class="text-muted-foreground text-xs font-semibold tracking-widest uppercase">Users</h2>
+
+        <!-- Row 1: Pie (annual share) + Line (income vs expense per user) -->
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <AllUsersPieChart {usersTrends} />
+          <AllUsersStackedChart {usersTrends} title="Trends" />
+        </div>
+        <AllUsersLineChart {usersTrends} />
+
+        <!-- Row 2: Stacked column — monthly expense breakdown by user -->
+      </section>
     {/if}
   </div>
 </Layout>
