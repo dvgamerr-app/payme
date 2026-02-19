@@ -34,7 +34,6 @@ export const PUT = async ({ params, request }) => {
     const resultRows = await db
       .select({
         id: budgetCategories.id,
-        user_id: budgetCategories.userId,
         label: budgetCategories.label,
         default_amount: budgetCategories.defaultAmount,
       })

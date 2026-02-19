@@ -145,7 +145,7 @@
         {@const expense = item.data}
         <div
           animate:flip={{ duration: flipDurationMs }}
-          class="flex items-center justify-between outline-none focus:outline-none"
+          class="group flex items-center justify-between outline-none focus:outline-none"
         >
           {#if editingId === expense.id}
             <div class="flex flex-1 items-end gap-2 pl-4">

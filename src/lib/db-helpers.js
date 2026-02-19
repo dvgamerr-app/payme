@@ -144,11 +144,10 @@ export const getMonthByIdForUser = async (monthId, userId) => {
   return month
 }
 
-export const getCategoryByIdForUser = async (categoryId, userId) => {
+export const getCategoryByIdForUser = async (categoryId) => {
   const rows = await db
     .select({
       id: budgetCategories.id,
-      user_id: budgetCategories.userId,
       label: budgetCategories.label,
       default_amount: budgetCategories.defaultAmount,
     })
@@ -159,10 +158,6 @@ export const getCategoryByIdForUser = async (categoryId, userId) => {
   const category = rows[0]
 
   if (!category) {
-    throw new Error('Category not found')
-  }
-
-  if (category.user_id !== userId) {
     throw new Error('Category not found')
   }
 

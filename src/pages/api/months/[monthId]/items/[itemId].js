@@ -30,7 +30,7 @@ export const PUT = async ({ params, request }) => {
     await verifyItemOwnership(itemId, monthId, user.id)
 
     if (category_id !== undefined) {
-      await getCategoryByIdForUser(category_id, user.id)
+      await getCategoryByIdForUser(category_id)
     }
 
     const updates = {}

@@ -11,7 +11,6 @@ export const GET = async ({ request }) => {
     const categories = await db
       .select({
         id: budgetCategories.id,
-        user_id: budgetCategories.userId,
         label: budgetCategories.label,
         default_amount: budgetCategories.defaultAmount,
       })
@@ -34,12 +33,11 @@ export const POST = async ({ request }) => {
 
     const rows = await db
       .insert(budgetCategories)
-      .values({ userId: user.id, label, defaultAmount: default_amount })
+      .values({ label, defaultAmount: default_amount })
       .returning({ id: budgetCategories.id })
 
     const category = {
       id: rows[0]?.id,
-      user_id: user.id,
       label,
       default_amount,
     }

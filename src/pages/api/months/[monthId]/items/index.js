@@ -49,7 +49,6 @@ export const POST = async ({ params, request }) => {
       const defaultCategory = await db
         .select({ id: budgetCategories.id })
         .from(budgetCategories)
-        .where(eq(budgetCategories.userId, user.id))
         .limit(1)
 
       if (defaultCategory.length > 0) {
@@ -58,7 +57,7 @@ export const POST = async ({ params, request }) => {
         throw new Error('No category available. Please create a category first.')
       }
     } else {
-      await getCategoryByIdForUser(category_id, user.id)
+      await getCategoryByIdForUser(category_id)
     }
 
     const rows = await db

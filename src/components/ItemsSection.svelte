@@ -284,71 +284,26 @@
   </div>
 
   <!-- Desktop Table View -->
-  <table class="hidden min-h-50 w-full text-sm md:table">
-    <thead>
-      <tr class="border-border border-b">
-        <th class="text-muted-foreground w-22 py-3 text-left text-xs font-medium">Date</th>
-        <th class="text-muted-foreground py-3 text-left text-xs font-medium">Description</th>
-        <th class="text-muted-foreground w-28 py-3 text-left text-xs font-medium">Category</th>
-        <th class="text-muted-foreground w-36 py-3 text-right text-xs font-medium">Amount</th>
-        {#if !isReadOnly}
-          <th class="w-20"></th>
-        {/if}
-      </tr>
-    </thead>
-    <tbody>
-      {#if isAdding && !isMobile}
-        <tr class="hover:bg-accent/50 transition-colors">
-          <td class="py-0.5">
-            <DatePicker bind:value={spentOn} className="text-xs" on:keydown={handleKeyDown} />
-          </td>
-          <td class="py-0.5">
-            <Input
-              placeholder="Description"
-              bind:value={description}
-              bind:this={descriptionInput}
-              className="text-xs"
-              on:keydown={handleKeyDown}
-            />
-          </td>
-          <td class="py-0.5">
-            <Select
-              options={categoryOptions}
-              bind:value={categoryId}
-              className="text-xs"
-              placeholder="Optional"
-              on:keydown={handleKeyDown}
-            />
-          </td>
-          <td class="py-0.5 text-right">
-            <Input
-              type="text"
-              placeholder="Amount"
-              bind:value={amount}
-              bind:this={amountInput}
-              formatAsNumber={true}
-              className="text-xs text-right"
-              on:keydown={handleKeyDown}
-            />
-          </td>
-          <td class="py-0.5">
-            <SaveButtons onSave={handleAdd} onCancel={resetForm} />
-          </td>
+  <div class="border-border hidden min-h-50 border-b md:block">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-border border-b">
+          <th class="text-muted-foreground w-22 py-3 text-left text-xs font-medium">Date</th>
+          <th class="text-muted-foreground py-3 text-left text-xs font-medium">Description</th>
+          <th class="text-muted-foreground w-28 py-3 text-left text-xs font-medium">Category</th>
+          <th class="text-muted-foreground w-36 py-3 text-right text-xs font-medium">Amount</th>
+          {#if !isReadOnly}
+            <th class="w-20"></th>
+          {/if}
         </tr>
-      {/if}
-      {#each items as item (item.id)}
-        <tr
-          class="hover:bg-accent/50 transition-colors last:border-0 {editingId !== item.id
-            ? 'border-border cursor-pointer border-b'
-            : ''}"
-          on:click={() => isMobile && !isReadOnly && !isAdding && !editingId && startEdit(item)}
-          on:dblclick={() => !isMobile && !isReadOnly && !isAdding && !editingId && startEdit(item)}
-        >
-          {#if editingId === item.id && !isMobile}
-            <td class="py-1">
+      </thead>
+      <tbody>
+        {#if isAdding && !isMobile}
+          <tr class="hover:bg-accent/50 transition-colors">
+            <td class="py-0.5">
               <DatePicker bind:value={spentOn} className="text-xs" on:keydown={handleKeyDown} />
             </td>
-            <td>
+            <td class="py-0.5">
               <Input
                 placeholder="Description"
                 bind:value={description}
@@ -357,95 +312,143 @@
                 on:keydown={handleKeyDown}
               />
             </td>
-            <td>
+            <td class="py-0.5">
               <Select
                 options={categoryOptions}
                 bind:value={categoryId}
                 className="text-xs"
+                placeholder="Optional"
                 on:keydown={handleKeyDown}
               />
             </td>
-            <td>
+            <td class="py-0.5 text-right">
               <Input
                 type="text"
                 placeholder="Amount"
                 bind:value={amount}
                 bind:this={amountInput}
                 formatAsNumber={true}
-                textAlign="right"
-                className="text-xs"
+                className="text-xs text-right"
                 on:keydown={handleKeyDown}
               />
             </td>
-            <td>
-              <SaveButtons onSave={() => handleUpdate(item.id)} onCancel={resetForm} />
+            <td class="py-0.5">
+              <SaveButtons onSave={handleAdd} onCancel={resetForm} />
             </td>
-          {:else}
-            <td class="text-muted-foreground py-3 text-sm">{formatDate(item.spent_on)}</td>
-            <td class="text-foreground py-3 text-sm">{item.description}</td>
-            <td class="py-3">
-              {#if item.category_label}
-                <span class="bg-accent text-accent-foreground inline-block px-2 py-0.5 text-xs">
-                  {item.category_label}
-                </span>
-              {:else}
-                <span class="text-muted-foreground text-xs italic">No category</span>
-              {/if}
-            </td>
-            <td class="text-foreground py-3 text-right text-sm font-medium">
-              {formatCurrency(item.amount, currencySymbol)}
-            </td>
-            {#if !isReadOnly && editingId !== item.id}
-              <td class="py-2">
-                <div class="flex justify-center">
-                  <div class="relative">
-                    <button
-                      on:click|stopPropagation={() => toggleDropdown(item.id)}
-                      class="hover:bg-sand-200 dark:hover:bg-charcoal-800 p-1"
-                      disabled={isAdding || editingId}
-                    >
-                      <EllipsisVertical size={14} />
-                    </button>
-                    {#if openDropdownId === item.id}
-                      <div
-                        class="bg-background border-border absolute right-0 z-10 mt-1 w-40 border shadow-lg"
-                      >
-                        <button
-                          on:click={() => openMoveModal(item)}
-                          class="hover:bg-accent text-foreground block w-full px-4 py-2 text-left text-xs"
-                        >
-                          Move
-                        </button>
-                        <button
-                          on:click={() => {
-                            if (confirm('Are you sure you want to delete this transaction?')) {
-                              handleDelete(item.id)
-                            }
-                            closeDropdown()
-                          }}
-                          class="hover:bg-destructive/10 text-destructive block w-full px-4 py-2 text-left text-xs"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    {/if}
-                  </div>
-                </div>
+          </tr>
+        {/if}
+        {#each items as item (item.id)}
+          <tr
+            class="hover:bg-accent/50 transition-colors last:border-0 {editingId !== item.id
+              ? 'border-border cursor-pointer border-b'
+              : ''}"
+            on:click={() => isMobile && !isReadOnly && !isAdding && !editingId && startEdit(item)}
+            on:dblclick={() =>
+              !isMobile && !isReadOnly && !isAdding && !editingId && startEdit(item)}
+          >
+            {#if editingId === item.id && !isMobile}
+              <td class="py-1">
+                <DatePicker bind:value={spentOn} className="text-xs" on:keydown={handleKeyDown} />
               </td>
+              <td>
+                <Input
+                  placeholder="Description"
+                  bind:value={description}
+                  bind:this={descriptionInput}
+                  className="text-xs"
+                  on:keydown={handleKeyDown}
+                />
+              </td>
+              <td>
+                <Select
+                  options={categoryOptions}
+                  bind:value={categoryId}
+                  className="text-xs"
+                  on:keydown={handleKeyDown}
+                />
+              </td>
+              <td>
+                <Input
+                  type="text"
+                  placeholder="Amount"
+                  bind:value={amount}
+                  bind:this={amountInput}
+                  formatAsNumber={true}
+                  textAlign="right"
+                  className="text-xs"
+                  on:keydown={handleKeyDown}
+                />
+              </td>
+              <td>
+                <SaveButtons onSave={() => handleUpdate(item.id)} onCancel={resetForm} />
+              </td>
+            {:else}
+              <td class="text-muted-foreground py-3 text-sm">{formatDate(item.spent_on)}</td>
+              <td class="text-foreground py-3 text-sm">{item.description}</td>
+              <td class="py-3">
+                {#if item.category_label}
+                  <span class="bg-accent text-accent-foreground inline-block px-2 py-0.5 text-xs">
+                    {item.category_label}
+                  </span>
+                {:else}
+                  <span class="text-muted-foreground text-xs italic">No category</span>
+                {/if}
+              </td>
+              <td class="text-foreground py-3 text-right text-sm font-medium">
+                {formatCurrency(item.amount, currencySymbol)}
+              </td>
+              {#if !isReadOnly && editingId !== item.id}
+                <td class="py-2">
+                  <div class="flex justify-center">
+                    <div class="relative">
+                      <button
+                        on:click|stopPropagation={() => toggleDropdown(item.id)}
+                        class="hover:bg-sand-200 dark:hover:bg-charcoal-800 p-1"
+                        disabled={isAdding || editingId}
+                      >
+                        <EllipsisVertical size={14} />
+                      </button>
+                      {#if openDropdownId === item.id}
+                        <div
+                          class="bg-background border-border absolute right-0 z-10 mt-1 w-40 border shadow-lg"
+                        >
+                          <button
+                            on:click={() => openMoveModal(item)}
+                            class="hover:bg-accent text-foreground block w-full px-4 py-2 text-left text-xs"
+                          >
+                            Move
+                          </button>
+                          <button
+                            on:click={() => {
+                              if (confirm('Are you sure you want to delete this transaction?')) {
+                                handleDelete(item.id)
+                              }
+                              closeDropdown()
+                            }}
+                            class="hover:bg-destructive/10 text-destructive block w-full px-4 py-2 text-left text-xs"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                </td>
+              {/if}
             {/if}
-          {/if}
-        </tr>
-      {/each}
+          </tr>
+        {/each}
 
-      {#if items.length === 0 && !isAdding}
-        <tr>
-          <td colspan={isReadOnly ? 4 : 5} class="text-muted-foreground py-8 text-center text-sm">
-            No spending items yet
-          </td>
-        </tr>
-      {/if}
-    </tbody>
-  </table>
+        {#if items.length === 0 && !isAdding}
+          <tr>
+            <td colspan={isReadOnly ? 4 : 5} class="text-muted-foreground py-8 text-center text-sm">
+              No spending items yet
+            </td>
+          </tr>
+        {/if}
+      </tbody>
+    </table>
+  </div>
 </Card>
 
 <Modal

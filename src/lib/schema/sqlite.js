@@ -72,9 +72,6 @@ export const userSettings = sqliteTable('user_settings', {
 
 export const budgetCategories = sqliteTable('budget_categories', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: integer('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
   label: text('label').notNull(),
   defaultAmount: real('default_amount').notNull(),
 })

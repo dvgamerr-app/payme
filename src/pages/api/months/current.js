@@ -38,7 +38,6 @@ export const GET = async ({ request }) => {
       const categories = await db
         .select({ id: budgetCategories.id, default_amount: budgetCategories.defaultAmount })
         .from(budgetCategories)
-        .where(eq(budgetCategories.userId, user.id))
 
       if (categories.length > 0) {
         await db.insert(monthlyBudgets).values(

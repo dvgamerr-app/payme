@@ -80,9 +80,6 @@ export const userSettings = pgTable('user_settings', {
 
 export const budgetCategories = pgTable('budget_categories', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
   label: text('label').notNull(),
   defaultAmount: doublePrecision('default_amount').notNull(),
 })

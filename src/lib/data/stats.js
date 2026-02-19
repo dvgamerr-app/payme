@@ -13,7 +13,6 @@ export async function getStatsData(user) {
   const categories = await db
     .select({ id: budgetCategories.id, label: budgetCategories.label })
     .from(budgetCategories)
-    .where(eq(budgetCategories.userId, user.id))
     .orderBy(asc(budgetCategories.label))
 
   // Current year spending (YTD - Year to Date)
