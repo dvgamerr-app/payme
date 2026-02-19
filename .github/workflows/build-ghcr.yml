@@ -66,7 +66,7 @@ jobs:
         run: docker buildx build --target migration --output "type=image,push=${{ !contains(github.event_name, 'pull_request') }}" ${{ steps.prepare.outputs.buildx_args }}-migration --file $IMAGE_FILE .
 
   rollout:
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, linux]
     needs: build
     if: github.event_name != 'pull_request' && startsWith(github.ref, 'refs/tags/')
     permissions:
@@ -96,15 +96,15 @@ jobs:
 
       - name: Set new image 🖼️
         uses: actions-hub/kubectl@master
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        # env:
+        #   KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
           args: --insecure-skip-tls-verify=true set image ${{ env.KUBE_CONTAINER }} payme=${{ needs.build.outputs.docker_image }}:${{ needs.build.outputs.version }} -n ${{ env.KUBE_NAMESPACE }}
 
       - name: Trigger deploy 🚀
         uses: actions-hub/kubectl@master
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        # env:
+        #   KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
           args: --insecure-skip-tls-verify=true rollout restart ${{ env.KUBE_CONTAINER }} -n ${{ env.KUBE_NAMESPACE }}
 
