@@ -1,31 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-/* Maple Mono Font - Local Files */
-@font-face {
-  font-family: 'Maple Mono';
-  src: url('/fonts/MapleMono-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Maple Mono';
-  src: url('/fonts/MapleMono-Italic.ttf') format('truetype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Maple Mono';
-  src: url('/fonts/MapleMono-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 @custom-variant dark (&:is(.dark *));
 
 /* Warm minimalist color palette inspired by modern finance apps */
@@ -129,6 +104,7 @@
 }
 
 @theme inline {
+  --font-maple: 'Maple Mono', system-ui, sans-serif;
   --font-mono: 'Noto Sans Thai', 'Noto Sans', 'Maple Mono', system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
