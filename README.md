@@ -22,10 +22,10 @@
 ## 🚀 เริ่มต้นใช้งาน (Quick Start)
 
 ```bash
-# ติดตั้ง dependencies ด้วย Bun หรือ npm
+# ติดตั้ง dependencies ด้วย Bun
 bun install
 # หรือ
-npm install
+bun install
 
 # รัน server สำหรับ development (http://localhost:3000)
 bun run dev

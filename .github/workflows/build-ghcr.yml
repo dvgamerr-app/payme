@@ -2,11 +2,11 @@ name: build
 
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
     tags:
-      - "v*"
+      - 'v*'
   pull_request:
-    branches: ["main"]
+    branches: ['main']
 
 jobs:
   build:
@@ -120,7 +120,7 @@ jobs:
         uses: tsickert/discord-webhook@v5.3.0
         with:
           webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
-          content: "`${{ env.KUBE_CONTAINER }}` successfully rolled out image `${{ needs.build.outputs.docker_image }}:${{ needs.build.outputs.version }}`"
+          content: '`${{ env.KUBE_CONTAINER }}` successfully rolled out image `${{ needs.build.outputs.docker_image }}:${{ needs.build.outputs.version }}`'
 
       - name: Fail Alert
         continue-on-error: true
