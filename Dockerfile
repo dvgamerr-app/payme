@@ -1,5 +1,5 @@
 # Build stage
-FROM oven/bun:1-alpine AS builder
+FROM oven/bun:1.4.4-alpine AS builder
 
 # Install runtime dependencies for native modules
 RUN apk add --no-cache make g++
@@ -19,7 +19,7 @@ COPY . .
 RUN bun run build
 
 # Migration stage (includes devDependencies for drizzle-kit)
-FROM oven/bun:1-alpine AS migration
+FROM oven/bun:1.4.4-alpine AS migration
 
 WORKDIR /app
 
@@ -35,7 +35,7 @@ COPY drizzle.config.js ./
 COPY src ./src
 
 # Production stage
-FROM oven/bun:1-alpine
+FROM oven/bun:1.4.4-alpine
 
 WORKDIR /app
 
